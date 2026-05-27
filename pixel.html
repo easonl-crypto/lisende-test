@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AITI | AI 模型倾向测试</title>
+    <link rel="stylesheet" href="./pixel-styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <img class="brand-logo" src="./assets/gmi-logo.jpg" alt="GMI" />
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <p class="eyebrow">测测你是哪种</p>
+          <h1 id="hero-title">AITI</h1>
+          <p class="tagline">倾向类型？<br class="mobile-break" />写作、代码、视频、图像、Agent……测完就知道</p>
+        </div>
+      </section>
+
+      <section class="test-panel" aria-live="polite">
+        <div id="start-screen" class="screen active">
+          <article class="starter-card intro-card">
+            <span class="stamp">PIXEL QUEST</span>
+            <h2>请选择你的 AI 形态。</h2>
+            <p>
+              有人靠语言续命，<br />
+              有人靠代码救场，<br />
+              有人把脑洞剪成视频，<br />
+              有人只想按下按钮，<br />
+              让 AI 自己开工。
+            </p>
+            <p class="intro-question">你会是哪一种？</p>
+          </article>
+          <div class="pixel-party" aria-hidden="true">
+            <span class="party-bubble bubble-chat"></span>
+            <span class="party-bubble bubble-heart"></span>
+            <span class="party-bubble bubble-check"></span>
+            <span class="party-star star-one"></span>
+            <span class="party-star star-two"></span>
+            <span class="party-buddy buddy-writer">
+              <span class="buddy-tool"></span>
+              <span class="buddy-hair"></span>
+              <span class="buddy-head"></span>
+              <span class="buddy-body"></span>
+            </span>
+            <span class="party-buddy buddy-coder">
+              <span class="buddy-tool"></span>
+              <span class="buddy-hair"></span>
+              <span class="buddy-head"></span>
+              <span class="buddy-body"></span>
+            </span>
+            <span class="party-buddy buddy-artist">
+              <span class="buddy-tool"></span>
+              <span class="buddy-hair"></span>
+              <span class="buddy-head"></span>
+              <span class="buddy-body"></span>
+            </span>
+            <span class="party-buddy buddy-video">
+              <span class="buddy-tool"></span>
+              <span class="buddy-hair"></span>
+              <span class="buddy-head"></span>
+              <span class="buddy-body"></span>
+            </span>
+            <span class="party-buddy buddy-robot">
+              <span class="buddy-tool"></span>
+              <span class="buddy-hair"></span>
+              <span class="buddy-head"></span>
+              <span class="buddy-body"></span>
+            </span>
+          </div>
+          <button id="start-btn" class="primary-btn" type="button">
+            <span class="start-kicker">START TEST</span>
+            <span>开始测试</span>
+            <span aria-hidden="true">></span>
+          </button>
+        </div>
+
+        <div id="quiz-screen" class="screen">
+          <div class="quiz-topline">
+            <p id="progress-text">Question 1 / 10</p>
+            <div class="progress-track" aria-hidden="true">
+              <span id="progress-bar"></span>
+            </div>
+          </div>
+          <h2 id="question-title"></h2>
+          <div id="options" class="options"></div>
+        </div>
+
+        <div id="result-screen" class="screen">
+          <div class="result-layout">
+            <div class="result-copy">
+              <p class="eyebrow result-kicker">AITI 生成报告 <span id="result-rarity"></span></p>
+              <h2 id="result-title"></h2>
+              <div class="result-visual">
+                <div id="avatar" class="avatar" aria-hidden="true"></div>
+                <div id="result-code" class="result-code"></div>
+              </div>
+              <p id="result-subtitle" class="result-subtitle"></p>
+              <div id="trait-list" class="trait-list"></div>
+              <div class="model-card">
+                <span class="model-card-title">猜你常用 / 适合试</span>
+                <div id="model-list" class="model-list"></div>
+              </div>
+              <p id="result-prompt" class="prompt-card"></p>
+              <div class="claim-card">
+                <span class="claim-kicker">TOKEN TRIAL</span>
+                <strong>领取 token 试用模型！</strong>
+                <p>回复 <mark>上船开造</mark> 领取</p>
+                <button id="claim-btn" class="claim-btn" type="button">复制口令并扫码关注</button>
+              </div>
+              <div class="result-actions">
+                <button id="restart-btn" class="primary-btn compact" type="button">重测</button>
+                <button id="copy-btn" class="ghost-btn" type="button">复制结果</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <div id="qr-modal" class="qr-modal" hidden>
+        <div class="qr-dialog" role="dialog" aria-modal="true" aria-labelledby="qr-title">
+          <button id="qr-close-btn" class="qr-close-btn" type="button" aria-label="关闭">×</button>
+          <span class="claim-kicker">GMI CLOUD</span>
+          <h2 id="qr-title">扫码关注公众号</h2>
+          <div class="qr-box">
+            <img class="qr-image" src="./assets/gmi-qrcode.jpg" alt="GMI Cloud 黑板报公众号二维码" />
+          </div>
+          <p class="qr-copy">关注 <strong>GMI Cloud 黑板报</strong>，回复 <mark>上船开造</mark> 领取 token 试用模型。</p>
+        </div>
+      </div>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
