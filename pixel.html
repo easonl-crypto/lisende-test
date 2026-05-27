@@ -106,11 +106,11 @@
                 <span class="claim-kicker">TOKEN TRIAL</span>
                 <strong>领取 token 试用模型！</strong>
                 <p>回复 <mark>上船开造</mark> 领取</p>
-                <button id="claim-btn" class="claim-btn" type="button">复制口令并扫码关注</button>
+                <button id="claim-btn" class="claim-btn" type="button">复制领取口令</button>
               </div>
               <div class="result-actions">
                 <button id="restart-btn" class="primary-btn compact" type="button">重测</button>
-                <button id="copy-btn" class="ghost-btn" type="button">复制结果</button>
+                <button id="copy-btn" class="ghost-btn" type="button">生成个性海报</button>
               </div>
             </div>
           </div>
@@ -127,8 +127,22 @@
           <p class="qr-copy">关注 <strong>GMI Cloud 黑板报</strong>，回复 <mark>上船开造</mark> 领取 token 试用模型。</p>
         </div>
       </div>
+      <div id="poster-modal" class="poster-modal" hidden>
+        <div class="poster-dialog" role="dialog" aria-modal="true" aria-labelledby="poster-title">
+          <button id="poster-close-btn" class="qr-close-btn" type="button" aria-label="关闭">×</button>
+          <span class="claim-kicker">AITI POSTER</span>
+          <h2 id="poster-title">你的个性海报已生成</h2>
+          <div class="poster-frame">
+            <img id="poster-preview" alt="AITI 个性海报预览" />
+          </div>
+          <div class="poster-actions">
+            <a id="poster-download" class="primary-btn compact" download="aiti-poster.png">下载海报</a>
+            <button id="poster-copy-tip" class="ghost-btn" type="button">复制口令</button>
+          </div>
+        </div>
+      </div>
     </main>
 
-    <script src="./app.js"></script>
+    <script src="./pixel-app.js"></script>
   </body>
 </html>
