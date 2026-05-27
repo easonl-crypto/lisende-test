@@ -738,7 +738,7 @@ function drawPosterText(ctx, result) {
   ctx.fillStyle = "#07030f";
   ctx.font = "900 30px Arial, Microsoft YaHei";
   ctx.textAlign = "left";
-  ctx.fillText("回复【上船开造】领取 token 试用模型", 126, 1249);
+  ctx.fillText("回复【上船开造】领取 Token 试用额度", 126, 1249);
 }
 
 function drawPosterPills(ctx, items, x, y, maxWidth) {
