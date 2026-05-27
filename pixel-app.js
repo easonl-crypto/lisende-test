@@ -667,6 +667,7 @@ async function createPosterImage(result) {
   drawPosterBackground(ctx, canvas.width, canvas.height);
   drawPosterPanel(ctx, 54, 54, 792, 1292, colors);
   drawPosterText(ctx, result);
+  await drawPosterLogo(ctx);
   await drawPosterPersonaImage(ctx, result);
   await drawPosterQr(ctx);
 
@@ -799,6 +800,11 @@ async function drawPosterQr(ctx) {
   ctx.fillText("扫码关注公众号", 706, 1204);
   ctx.font = "900 18px Arial, Microsoft YaHei";
   ctx.fillText("GMI Cloud 黑板报", 706, 1226);
+}
+
+async function drawPosterLogo(ctx) {
+  const logo = await loadPosterImage("./assets/gmi-logo-black-cutout.png");
+  drawContainedImage(ctx, logo, 642, 112, 148, 48);
 }
 
 async function drawPosterPersonaImage(ctx, result) {
