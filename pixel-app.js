@@ -752,35 +752,36 @@ function drawPosterText(ctx, result) {
   ctx.fillStyle = "#07030f";
   ctx.font = "900 28px Arial, Microsoft YaHei";
   ctx.textAlign = "left";
-  ctx.fillText("常见模型", 118, 1024);
-  drawPosterPills(ctx, result.models.slice(0, 5), 118, 1052, 430);
+  ctx.fillText("常见模型", 118, 1032);
+  drawPosterPills(ctx, result.models.slice(0, 6), 118, 1058, 455);
 
   ctx.fillStyle = "#ffd943";
   ctx.strokeStyle = "#07030f";
   ctx.lineWidth = 8;
-  roundRect(ctx, 92, 1190, 716, 96, 0, true, true);
+  roundRect(ctx, 92, 1232, 716, 82, 0, true, true);
   ctx.fillStyle = "#07030f";
-  ctx.font = "900 30px Arial, Microsoft YaHei";
+  ctx.font = "900 27px Arial, Microsoft YaHei";
   ctx.textAlign = "left";
-  ctx.fillText("回复【上船开造】领取 Token 试用额度", 126, 1249);
+  ctx.fillText("回复【上船开造】领取 Token 试用额度", 122, 1284);
 }
 
 function drawPosterPills(ctx, items, x, y, maxWidth) {
   let cursorX = x;
   let cursorY = y;
+  ctx.font = "900 22px Arial, Microsoft YaHei";
   items.forEach((item) => {
-    const width = Math.min(maxWidth, ctx.measureText(item).width + 34);
+    const width = Math.min(maxWidth, ctx.measureText(item).width + 28);
     if (cursorX + width > x + maxWidth) {
       cursorX = x;
-      cursorY += 54;
+      cursorY += 43;
     }
     ctx.fillStyle = "#ffffff";
     ctx.strokeStyle = "#07030f";
-    ctx.lineWidth = 6;
-    roundRect(ctx, cursorX, cursorY, width, 38, 0, true, true);
+    ctx.lineWidth = 5;
+    roundRect(ctx, cursorX, cursorY, width, 32, 0, true, true);
     ctx.fillStyle = "#07030f";
-    ctx.fillText(item, cursorX + 17, cursorY + 28);
-    cursorX += width + 14;
+    ctx.fillText(item, cursorX + 14, cursorY + 24);
+    cursorX += width + 12;
   });
 }
 
@@ -788,16 +789,16 @@ async function drawPosterQr(ctx) {
   const qr = await loadPosterImage("./assets/gmi-qrcode.jpg");
   ctx.fillStyle = "#ffffff";
   ctx.strokeStyle = "#07030f";
-  ctx.lineWidth = 8;
-  ctx.fillRect(606, 1016, 182, 182);
-  ctx.strokeRect(606, 1016, 182, 182);
-  ctx.drawImage(qr, 620, 1030, 154, 154);
+  ctx.lineWidth = 7;
+  ctx.fillRect(624, 1012, 164, 164);
+  ctx.strokeRect(624, 1012, 164, 164);
+  ctx.drawImage(qr, 637, 1025, 138, 138);
   ctx.fillStyle = "#07030f";
   ctx.textAlign = "center";
-  ctx.font = "900 22px Arial, Microsoft YaHei";
-  ctx.fillText("扫码关注公众号", 697, 1226);
-  ctx.font = "900 20px Arial, Microsoft YaHei";
-  ctx.fillText("GMI Cloud 黑板报", 697, 1252);
+  ctx.font = "900 19px Arial, Microsoft YaHei";
+  ctx.fillText("扫码关注公众号", 706, 1204);
+  ctx.font = "900 18px Arial, Microsoft YaHei";
+  ctx.fillText("GMI Cloud 黑板报", 706, 1226);
 }
 
 async function drawPosterPersonaImage(ctx, result) {
