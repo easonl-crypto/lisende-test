@@ -265,6 +265,7 @@ function getWinner() {
 function renderResult() {
   const winner = getWinner();
   const result = modelTypes[winner];
+  result.key = winner;
   state.result = result;
 
   document.querySelector("#result-code").textContent = result.code;
@@ -297,7 +298,39 @@ function renderTags(selector, values, className) {
   });
 }
 
+const personaImagePaths = {
+  llm: "./assets/personas/llm.png",
+  code: "./assets/personas/code.png",
+  video: "./assets/personas/video.png",
+  audio: "./assets/personas/audio.png",
+  image: "./assets/personas/image.png",
+  multimodal: "./assets/personas/multimodal.png",
+  agent: "./assets/personas/agent.png",
+  search: "./assets/personas/search.png",
+};
+
+const posterPersonaImagePaths = {
+  llm: "./assets/personas/cutouts/llm.png",
+  code: "./assets/personas/cutouts/code.png",
+  video: "./assets/personas/cutouts/video.png",
+  audio: "./assets/personas/cutouts/audio.png",
+  image: "./assets/personas/cutouts/image.png",
+  multimodal: "./assets/personas/cutouts/multimodal.png",
+  agent: "./assets/personas/cutouts/agent.png",
+  search: "./assets/personas/cutouts/search.png",
+};
+
+function getPersonaImagePath(type) {
+  return personaImagePaths[type] || personaImagePaths.llm;
+}
+
+function getPosterPersonaImagePath(type) {
+  return posterPersonaImagePaths[type] || posterPersonaImagePaths.llm;
+}
+
 function createAvatarSvg(type, result) {
+  return `<img class="persona-card-img" src="${getPersonaImagePath(type)}" alt="${result.code} ${result.title}" />`;
+
   const config = avatarConfigs[type];
   const skin = config.skin || "#e7b77f";
   const shadow = config.shadow || "#8a5d3f";
@@ -634,6 +667,7 @@ async function createPosterImage(result) {
   drawPosterBackground(ctx, canvas.width, canvas.height);
   drawPosterPanel(ctx, 54, 54, 792, 1292, colors);
   drawPosterText(ctx, result);
+  await drawPosterPersonaImage(ctx, result);
   await drawPosterQr(ctx);
 
   return canvas.toDataURL("image/png");
@@ -713,23 +747,13 @@ function drawPosterText(ctx, result) {
 
   ctx.font = "900 30px Arial, Microsoft YaHei";
   ctx.fillStyle = "#5b19d8";
-  ctx.fillText(result.rarity, 450, 545);
+  ctx.fillText(result.rarity, 450, 480);
 
   ctx.fillStyle = "#07030f";
-  ctx.font = "800 30px Arial, Microsoft YaHei";
-  wrapCanvasText(ctx, result.subtitle, 450, 615, 720, 44, 5);
-
-  const tagY = 830;
   ctx.font = "900 28px Arial, Microsoft YaHei";
   ctx.textAlign = "left";
-  ctx.fillStyle = "#07030f";
-  ctx.fillText("适合场景", 118, tagY);
-  drawPosterPills(ctx, result.traits.slice(0, 5), 118, tagY + 28, 430);
-
-  ctx.fillStyle = "#07030f";
-  ctx.font = "900 28px Arial, Microsoft YaHei";
-  ctx.fillText("常见模型", 118, 1000);
-  drawPosterPills(ctx, result.models.slice(0, 5), 118, 1028, 430);
+  ctx.fillText("常见模型", 118, 1024);
+  drawPosterPills(ctx, result.models.slice(0, 5), 118, 1052, 430);
 
   ctx.fillStyle = "#ffd943";
   ctx.strokeStyle = "#07030f";
@@ -765,15 +789,37 @@ async function drawPosterQr(ctx) {
   ctx.fillStyle = "#ffffff";
   ctx.strokeStyle = "#07030f";
   ctx.lineWidth = 8;
-  ctx.fillRect(575, 850, 214, 214);
-  ctx.strokeRect(575, 850, 214, 214);
-  ctx.drawImage(qr, 591, 866, 182, 182);
+  ctx.fillRect(606, 1016, 182, 182);
+  ctx.strokeRect(606, 1016, 182, 182);
+  ctx.drawImage(qr, 620, 1030, 154, 154);
   ctx.fillStyle = "#07030f";
   ctx.textAlign = "center";
-  ctx.font = "900 24px Arial, Microsoft YaHei";
-  ctx.fillText("扫码关注公众号", 682, 1098);
   ctx.font = "900 22px Arial, Microsoft YaHei";
-  ctx.fillText("GMI Cloud 黑板报", 682, 1127);
+  ctx.fillText("扫码关注公众号", 697, 1226);
+  ctx.font = "900 20px Arial, Microsoft YaHei";
+  ctx.fillText("GMI Cloud 黑板报", 697, 1252);
+}
+
+async function drawPosterPersonaImage(ctx, result) {
+  const key = result.key || Object.keys(modelTypes).find((item) => modelTypes[item].code === result.code) || "llm";
+  const image = await loadPosterImage(getPosterPersonaImagePath(key));
+  ctx.save();
+  ctx.globalAlpha = 0.22;
+  ctx.fillStyle = "#07030f";
+  roundRect(ctx, 218, 944, 464, 54, 0, true, false);
+  ctx.restore();
+  drawContainedImage(ctx, image, 110, 500, 680, 500);
+}
+
+function drawContainedImage(ctx, image, x, y, width, height) {
+  const ratio = Math.min(width / image.width, height / image.height);
+  const drawWidth = image.width * ratio;
+  const drawHeight = image.height * ratio;
+  const drawX = x + (width - drawWidth) / 2;
+  const drawY = y + (height - drawHeight) / 2;
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(image, drawX, drawY, drawWidth, drawHeight);
+  ctx.imageSmoothingEnabled = true;
 }
 
 function loadPosterImage(src) {
