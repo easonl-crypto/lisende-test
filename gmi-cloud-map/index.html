@@ -1,0 +1,3340 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Canva Replica</title>
+    <link rel="icon" href="data:," />
+    <link rel="preload" as="image" href="assets/page-background.jpg" />
+    <link rel="preload" as="image" href="assets/canva-poster-decorated-transparent.png" />
+    <link rel="preload" as="image" href="assets/gmi-logo.png" />
+    <link rel="preload" as="image" href="assets/poster-sign.png" />
+    <link rel="preload" as="image" href="assets/share-poster-page.png" />
+    <link rel="preload" as="image" href="assets/share-poster-original.png" />
+    <link rel="preload" as="image" href="assets/insight-page-report-map.png" />
+    <link rel="preload" as="image" href="assets/partner-page-new.png" />
+    <link rel="preload" as="image" href="assets/insight-detail-1.png" />
+    <link rel="preload" as="image" href="assets/insight-detail-2.png" />
+    <link rel="preload" as="image" href="assets/insight-detail-3.png" />
+    <link rel="preload" as="image" href="assets/checkmark-green.png?v=2" />
+    <link rel="preload" as="image" href="assets/taskbar-popup-frame.png?v=cutout2" />
+    <link rel="preload" as="image" href="assets/taskbar-hearts-state-1.png?v=exact2" />
+    <link rel="preload" as="image" href="assets/taskbar-heart-reveal-1.png?v=exact2" />
+    <style>
+      :root {
+        color-scheme: light;
+        --page-bg: #efeff1;
+        --feedback-ease: cubic-bezier(0.16, 0.9, 0.24, 1);
+        --feedback-press-duration: 130ms;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        width: 100%;
+        min-height: 100%;
+        margin: 0;
+      }
+
+      body {
+        display: grid;
+        min-height: 100dvh;
+        place-items: center;
+        overflow: hidden;
+        background: var(--page-bg);
+      }
+
+      .canvas-stage {
+        width: 100vw;
+        height: 100dvh;
+        display: grid;
+        place-items: center;
+      }
+
+      .map-frame {
+        width: min(100vw, calc(100dvh * 940 / 1672));
+        aspect-ratio: 940 / 1672;
+        position: relative;
+        overflow: hidden;
+        background: url("assets/page-background.jpg") center / 100% 100% no-repeat;
+        contain: layout paint style;
+        container-type: inline-size;
+        transform: translate3d(0, 0, 0);
+      }
+
+      .map-art {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        display: block;
+        object-fit: contain;
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+        user-select: none;
+        pointer-events: none;
+        -webkit-user-drag: none;
+        backface-visibility: hidden;
+        animation: map-foreground-enter 460ms var(--feedback-ease) both;
+      }
+
+      .poster-sign {
+        position: absolute;
+        left: 68%;
+        top: 85.5%;
+        z-index: 10;
+        width: 29%;
+        height: auto;
+        pointer-events: none;
+        user-select: none;
+        -webkit-user-drag: none;
+      }
+
+      .poster-sign-hotspot {
+        position: absolute;
+        left: 68%;
+        top: 85.5%;
+        z-index: 21;
+        width: 29%;
+        height: 13.5%;
+        border: 0;
+        padding: 0;
+        cursor: pointer;
+        background: transparent;
+        appearance: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .poster-sign-hotspot:focus-visible {
+        outline: none;
+      }
+
+      .page-gmi-logo {
+        position: absolute;
+        left: 2.3%;
+        bottom: 2.1%;
+        z-index: 12;
+        width: 16.5%;
+        height: 4.2%;
+        background: url("assets/gmi-logo.png") center center / 100% auto no-repeat;
+        pointer-events: none;
+        user-select: none;
+      }
+
+      .page-gmi-logo-insight {
+        z-index: 6;
+      }
+
+      .checkmark-layer {
+        position: absolute;
+        inset: 0;
+        z-index: 25;
+        overflow: hidden;
+        pointer-events: none;
+      }
+
+      .checkmark-marker {
+        position: absolute;
+        left: var(--check-x);
+        top: var(--check-y);
+        width: 6.383%;
+        aspect-ratio: 1;
+        display: block;
+        visibility: hidden;
+        opacity: 0;
+        transform: translate3d(-50%, -50%, 0) scale(1);
+        transform-origin: 50% 50%;
+        will-change: transform, opacity, filter;
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+        user-select: none;
+        -webkit-user-drag: none;
+        backface-visibility: hidden;
+      }
+
+      .checkmark-marker.is-dropping,
+      .checkmark-marker.is-complete {
+        visibility: visible;
+      }
+
+      .checkmark-marker.is-complete {
+        opacity: 1;
+        filter: none;
+        transform: translate3d(-50%, -50%, 0) scale(1);
+      }
+
+      .checkmark-marker.is-dropping {
+        animation: checkmark-drop 520ms cubic-bezier(0.19, 0.86, 0.28, 1)
+          forwards;
+      }
+
+      .intro-layer {
+        position: absolute;
+        inset: 0;
+        z-index: 100;
+        background: var(--page-bg);
+        opacity: 1;
+        pointer-events: none;
+      }
+
+      .intro-layer.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .intro-layer.is-gone {
+        display: none;
+      }
+
+      .intro-video {
+        width: 100%;
+        height: 100%;
+        display: block;
+        object-fit: contain;
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+        user-select: none;
+        -webkit-user-drag: none;
+        backface-visibility: hidden;
+      }
+
+      .hotspot {
+        position: absolute;
+        z-index: 20;
+        border: 0;
+        padding: 0;
+        cursor: pointer;
+        background: transparent;
+        appearance: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .hotspot:focus-visible {
+        outline: none;
+      }
+
+      .feedback-press {
+        animation: feedback-press var(--feedback-press-duration)
+          var(--feedback-ease) both;
+      }
+
+      .hotspot-ai {
+        left: 45%;
+        top: 9%;
+        width: 25%;
+        height: 15%;
+      }
+
+      .hotspot-taskbar {
+        left: 0%;
+        top: 0%;
+        width: 24%;
+        height: 15%;
+      }
+
+      .hotspot-product {
+        left: 54%;
+        top: 28%;
+        width: 28%;
+        height: 13%;
+      }
+
+      .hotspot-expert {
+        left: 31%;
+        top: 42%;
+        width: 30%;
+        height: 12%;
+      }
+
+      .hotspot-festival {
+        left: 27%;
+        top: 59%;
+        width: 28%;
+        height: 15%;
+      }
+
+      .hotspot-opentalk {
+        left: 37%;
+        top: 81%;
+        width: 30%;
+        height: 12%;
+      }
+
+      .hotspot-partner {
+        left: 62%;
+        top: 57%;
+        width: 36%;
+        height: 25%;
+      }
+
+      .hotspot-panda {
+        left: 40%;
+        top: 52.5%;
+        width: 17%;
+        height: 9.5%;
+      }
+
+      .hotspot-insight {
+        left: 3%;
+        top: 35%;
+        width: 34%;
+        height: 6%;
+      }
+
+      .hotspot-insight-globe {
+        left: 8%;
+        top: 18%;
+        width: 23%;
+        height: 16%;
+      }
+
+      .insight-page-layer {
+        position: absolute;
+        inset: 0;
+        z-index: 160;
+        visibility: hidden;
+        opacity: 0;
+        pointer-events: none;
+        overflow: hidden;
+        background: url("assets/page-background.jpg") center / 100% 100% no-repeat;
+        transform: translate3d(0, 2%, 0) scale(0.96);
+        transform-origin: 50% 50%;
+        will-change: transform, opacity;
+      }
+
+      .insight-page-layer.is-entering,
+      .insight-page-layer.is-open,
+      .insight-page-layer.is-closing {
+        visibility: visible;
+      }
+
+      .insight-page-layer.is-entering {
+        pointer-events: auto;
+        animation: insight-page-in 420ms var(--feedback-ease) forwards;
+      }
+
+      .insight-page-layer.is-open {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translate3d(0, 0, 0) scale(1);
+      }
+
+      .insight-page-layer.is-closing {
+        pointer-events: none;
+        animation: insight-page-out 240ms cubic-bezier(0.55, 0, 0.74, 0.22)
+          forwards;
+      }
+
+      .insight-page-art {
+        width: 100%;
+        height: 100%;
+        display: block;
+        object-fit: contain;
+        user-select: none;
+        pointer-events: none;
+        -webkit-user-drag: none;
+        image-rendering: auto;
+      }
+
+      .insight-close-hotspot {
+        position: absolute;
+        top: 2.4%;
+        right: 3.2%;
+        z-index: 5;
+        width: 7.5%;
+        height: 5%;
+        border: 0;
+        padding: 0;
+        cursor: pointer;
+        background: transparent;
+        appearance: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .insight-close-hotspot:focus-visible {
+        outline: none;
+      }
+
+      .insight-poster-hotspot {
+        position: absolute;
+        left: 63.5%;
+        top: 83.4%;
+        z-index: 6;
+        width: 35.5%;
+        height: 13.4%;
+        border: 0;
+        padding: 0;
+        cursor: pointer;
+        background: transparent;
+        appearance: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .insight-poster-hotspot:focus-visible {
+        outline: none;
+      }
+
+      .partner-page-layer {
+        position: absolute;
+        inset: 0;
+        z-index: 170;
+        visibility: hidden;
+        opacity: 0;
+        overflow: hidden;
+        pointer-events: none;
+        background: #021225;
+        transform: scale(0.97);
+        transform-origin: 50% 50%;
+        will-change: transform, opacity;
+      }
+
+      .partner-page-layer.is-entering,
+      .partner-page-layer.is-open,
+      .partner-page-layer.is-closing {
+        visibility: visible;
+      }
+
+      .partner-page-layer.is-entering {
+        pointer-events: auto;
+        animation: partner-page-in 460ms var(--feedback-ease) forwards;
+      }
+
+      .partner-page-layer.is-open {
+        opacity: 1;
+        pointer-events: auto;
+        transform: scale(1);
+      }
+
+      .partner-page-layer.is-closing {
+        pointer-events: none;
+        animation: partner-page-out 260ms cubic-bezier(0.55, 0, 0.74, 0.22) forwards;
+      }
+
+      .partner-page-art {
+        width: 100%;
+        height: 100%;
+        display: block;
+        object-fit: contain;
+        user-select: none;
+        pointer-events: none;
+        -webkit-user-drag: none;
+      }
+
+      .partner-close-hotspot {
+        position: absolute;
+        top: 1.3%;
+        right: 2.6%;
+        z-index: 2;
+        width: 12%;
+        height: 7.5%;
+        border: 0;
+        padding: 0;
+        cursor: pointer;
+        background: transparent;
+        appearance: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .partner-close-hotspot:focus-visible {
+        outline: none;
+      }
+
+      .partner-poster-hotspot {
+        position: absolute;
+        left: 66%;
+        top: 88.8%;
+        z-index: 3;
+        width: 32%;
+        height: 10.7%;
+        border: 0;
+        padding: 0;
+        cursor: pointer;
+        background: transparent;
+        appearance: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .partner-poster-hotspot:focus-visible {
+        outline: none;
+      }
+
+      .poster-page-layer {
+        position: absolute;
+        inset: 0;
+        z-index: 180;
+        visibility: hidden;
+        opacity: 0;
+        overflow: hidden;
+        pointer-events: none;
+        background: #e8e8e8;
+        transform: translate3d(0, 1.5%, 0) scale(0.96);
+        transform-origin: 50% 50%;
+        will-change: transform, opacity;
+      }
+
+      .poster-page-layer.is-entering,
+      .poster-page-layer.is-open,
+      .poster-page-layer.is-closing {
+        visibility: visible;
+      }
+
+      .poster-page-layer.is-entering {
+        pointer-events: auto;
+        animation: poster-page-in 480ms var(--feedback-ease) forwards;
+      }
+
+      .poster-page-layer.is-open {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translate3d(0, 0, 0) scale(1);
+      }
+
+      .poster-page-layer.is-closing {
+        pointer-events: none;
+        animation: poster-page-out 240ms cubic-bezier(0.55, 0, 0.74, 0.22) forwards;
+      }
+
+      .poster-page-art {
+        width: 100%;
+        height: 100%;
+        display: block;
+        object-fit: contain;
+        user-select: none;
+        pointer-events: none;
+        -webkit-user-drag: none;
+      }
+
+      .poster-photo-layer {
+        position: absolute;
+        inset: 0;
+        z-index: 2;
+        pointer-events: none;
+      }
+
+      .poster-composite-image {
+        position: absolute;
+        left: 12.646%;
+        top: 2.99%;
+        z-index: 3;
+        width: 74.814%;
+        height: 85.526%;
+        display: block;
+        object-fit: fill;
+        user-select: auto;
+        pointer-events: auto;
+        -webkit-user-drag: auto;
+        -webkit-touch-callout: default;
+      }
+
+      .poster-composite-image[hidden] {
+        display: none;
+      }
+
+      .poster-photo-slot {
+        position: absolute;
+        left: var(--poster-x);
+        top: var(--poster-y);
+        width: var(--poster-w);
+        height: var(--poster-h);
+        overflow: hidden;
+        border-radius: var(--poster-radius, 0);
+        background: #f1f1f1;
+      }
+
+      .poster-photo-slot img {
+        width: 100%;
+        height: 100%;
+        display: block;
+        object-fit: cover;
+        object-position: center;
+      }
+
+      .poster-actions-backdrop {
+        position: absolute;
+        inset: 0;
+        z-index: 4;
+        background: url("assets/page-background.jpg") center / 100% 100% no-repeat;
+        clip-path: inset(89.5% 11.5% 1.2% 11.5%);
+        pointer-events: none;
+      }
+
+      .poster-actions {
+        position: absolute;
+        left: 13.5%;
+        top: 91%;
+        z-index: 5;
+        width: 73%;
+        height: 6.2%;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 2.4%;
+      }
+
+      .poster-action-button {
+        border: 0;
+        border-radius: 0.8cqw;
+        padding: 0 1cqw;
+        cursor: pointer;
+        background: #050505;
+        color: #dafa20;
+        box-shadow: 0 0.7cqw 0 #8a8a8a;
+        font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+        font-size: 4.25cqw;
+        font-weight: 900;
+        line-height: 1;
+        letter-spacing: 0;
+        white-space: nowrap;
+        appearance: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .poster-action-button:active {
+        box-shadow: 0 0.25cqw 0 #777;
+        transform: translateY(0.45cqw);
+      }
+
+      .poster-action-button:focus-visible {
+        outline: 0.35cqw solid #174aa3;
+        outline-offset: 0.3cqw;
+      }
+
+      .poster-return-side {
+        position: absolute;
+        top: 0;
+        z-index: 3;
+        width: 12.6%;
+        height: 100%;
+        border: 0;
+        padding: 0;
+        cursor: pointer;
+        background: transparent;
+        appearance: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .poster-return-side-left {
+        left: 0;
+      }
+
+      .poster-return-side-right {
+        right: 0;
+      }
+
+      .poster-return-side:focus-visible {
+        outline: none;
+      }
+
+      .insight-detail-target {
+        position: absolute;
+        z-index: 2;
+        border: 0;
+        padding: 0;
+        cursor: pointer;
+        background: transparent;
+        appearance: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .insight-detail-target:focus-visible,
+      .insight-detail-action:focus-visible {
+        outline: none;
+      }
+
+      .insight-detail-target-1 {
+        left: 8%;
+        top: 15%;
+        width: 48%;
+        height: 10%;
+      }
+
+      .insight-detail-target-2 {
+        left: 50.5%;
+        top: 37%;
+        width: 40%;
+        height: 12%;
+      }
+
+      .insight-detail-target-3 {
+        left: 7%;
+        top: 63.5%;
+        width: 44%;
+        height: 12%;
+      }
+
+      .insight-detail-card {
+        --detail-offset-x: 0%;
+        --detail-offset-y: 0%;
+        position: absolute;
+        z-index: 3;
+        width: var(--detail-width);
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transform: translate3d(var(--detail-offset-x), var(--detail-offset-y), 0)
+          scale(0.92);
+        transform-origin: 50% 50%;
+        will-change: transform, opacity;
+      }
+
+      .insight-detail-card-1 {
+        left: 53.45%;
+        top: 13.9%;
+        --detail-width: 46.23%;
+        --detail-offset-x: 18%;
+        --detail-offset-y: -8%;
+      }
+
+      .insight-detail-card-2 {
+        left: 7.23%;
+        top: 36.96%;
+        --detail-width: 39.32%;
+        --detail-offset-x: -18%;
+        --detail-offset-y: 8%;
+      }
+
+      .insight-detail-card-3 {
+        left: 53.45%;
+        top: 61.6%;
+        --detail-width: 42.72%;
+        --detail-offset-x: 18%;
+        --detail-offset-y: 10%;
+      }
+
+      .insight-detail-card.is-opening,
+      .insight-detail-card.is-open {
+        visibility: visible;
+        pointer-events: auto;
+      }
+
+      .insight-detail-card.is-opening {
+        animation: insight-detail-in 260ms var(--feedback-ease) forwards;
+      }
+
+      .insight-detail-card.is-open {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+      }
+
+      .insight-detail-card.is-closing {
+        visibility: visible;
+        pointer-events: none;
+        animation: insight-detail-out 220ms cubic-bezier(0.55, 0, 0.74, 0.22)
+          forwards;
+      }
+
+      .insight-detail-art {
+        display: block;
+        width: 100%;
+        height: auto;
+        user-select: none;
+        pointer-events: none;
+        -webkit-user-drag: none;
+        image-rendering: auto;
+      }
+
+      .insight-detail-action {
+        position: absolute;
+        z-index: 1;
+        border: 0;
+        padding: 0;
+        cursor: pointer;
+        background: transparent;
+        appearance: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .insight-copy-hotspot {
+        left: 18%;
+        bottom: 5.5%;
+        width: 66%;
+        height: 17%;
+      }
+
+      .insight-photo-plus-hotspot {
+        height: 16%;
+      }
+
+      .insight-detail-card-2 .insight-photo-plus-hotspot {
+        left: 14%;
+        bottom: 5%;
+        width: 70%;
+      }
+
+      .insight-detail-card-3 .insight-photo-plus-hotspot {
+        left: 18%;
+        bottom: 5%;
+        width: 64%;
+      }
+
+      .insight-photo-choice-sheet {
+        left: 9%;
+        bottom: 21%;
+        width: 82%;
+      }
+
+      .heart-bubble {
+        position: absolute;
+        left: 67.4%;
+        top: 51.2%;
+        z-index: 26;
+        width: 17%;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transform: translate3d(-50%, -50%, 0) scale(0.72);
+        transform-origin: 42% 100%;
+        will-change: transform, opacity;
+      }
+
+      .heart-bubble.is-visible {
+        visibility: visible;
+        opacity: 1;
+        transform: translate3d(-50%, -50%, 0) scale(1);
+        animation: heart-bubble-in 280ms var(--feedback-ease)
+          forwards;
+      }
+
+      .heart-bubble img {
+        width: 100%;
+        height: auto;
+        display: block;
+        user-select: none;
+        -webkit-user-drag: none;
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+        backface-visibility: hidden;
+      }
+
+      .taskbar-popup-layer {
+        position: absolute;
+        inset: 0;
+        z-index: 46;
+        visibility: hidden;
+        opacity: 0;
+        pointer-events: none;
+        background: transparent;
+        contain: layout paint style;
+        transform: translate3d(0, 0, 0) scale(0.94);
+        transform-origin: 50% 58%;
+        will-change: transform, opacity;
+      }
+
+      .taskbar-popup-layer.is-visible {
+        visibility: visible;
+        opacity: 1;
+        pointer-events: auto;
+        animation: taskbar-popup-in 280ms var(--feedback-ease)
+          forwards;
+      }
+
+      .taskbar-popup-layer.is-closing {
+        visibility: visible;
+        opacity: 0;
+        pointer-events: none;
+        animation: taskbar-popup-out 220ms cubic-bezier(0.55, 0, 0.74, 0.22)
+          forwards;
+      }
+
+      .taskbar-popup-art {
+        width: 100%;
+        height: 100%;
+        display: block;
+        object-fit: contain;
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+        user-select: none;
+        pointer-events: none;
+        -webkit-user-drag: none;
+        backface-visibility: hidden;
+      }
+
+      .taskbar-heart-stage {
+        position: absolute;
+        left: 0;
+        top: 33.49%;
+        z-index: 47;
+        width: 100%;
+        height: 19.14%;
+        pointer-events: none;
+        overflow: hidden;
+      }
+
+      .taskbar-heart-state,
+      .taskbar-heart-reveal {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        display: block;
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+        user-select: none;
+        -webkit-user-drag: none;
+      }
+
+      .taskbar-heart-reveal {
+        opacity: 0;
+        background-repeat: no-repeat;
+        background-size: 1100% 100%;
+        will-change: background-position, opacity;
+      }
+
+      .taskbar-heart-reveal.is-active {
+        opacity: 1;
+        animation: taskbar-heart-reveal 460ms steps(10, end) forwards;
+      }
+
+      .taskbar-progress-label {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        margin: -1px;
+        padding: 0;
+        border: 0;
+        clip: rect(0 0 0 0);
+        clip-path: inset(50%);
+        overflow: hidden;
+        white-space: nowrap;
+        z-index: 47;
+      }
+
+      .taskbar-close-hotspot {
+        position: absolute;
+        left: 30%;
+        top: 63.6%;
+        z-index: 48;
+        width: 40%;
+        height: 8%;
+        border: 0;
+        padding: 0;
+        cursor: pointer;
+        background: transparent;
+        appearance: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .taskbar-close-hotspot:focus-visible {
+        outline: none;
+      }
+
+      .popup-card {
+        --x: 50%;
+        --y: 50%;
+        --w: 33%;
+        --origin: 50% 50%;
+        position: absolute;
+        left: var(--x);
+        top: var(--y);
+        z-index: 30;
+        width: var(--w);
+        transform-origin: var(--origin);
+        transform: translate3d(-50%, -50%, 0) scale(0.72);
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        will-change: transform, opacity;
+      }
+
+      .popup-art {
+        width: 100%;
+        height: auto;
+        display: block;
+        user-select: none;
+        pointer-events: none;
+        -webkit-user-drag: none;
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+        backface-visibility: hidden;
+      }
+
+      .checkin-hotspot {
+        position: absolute;
+        left: 17%;
+        bottom: 7.2%;
+        z-index: 34;
+        width: 66%;
+        height: 17%;
+        border: 0;
+        padding: 0;
+        cursor: pointer;
+        background: transparent;
+        appearance: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .checkin-hotspot::after {
+        content: "";
+        position: absolute;
+        inset: 18% 42%;
+        border-radius: 999px;
+        background: rgba(255, 49, 80, 0);
+        transform: scale(0.76);
+        transition:
+          background-color 160ms linear,
+          transform 180ms cubic-bezier(0.16, 0.9, 0.24, 1);
+      }
+
+      .checkin-hotspot:active::after {
+        background: rgba(255, 49, 80, 0.16);
+        transform: scale(1);
+      }
+
+      .checkin-hotspot:focus-visible {
+        outline: none;
+      }
+
+      .photo-choice-sheet {
+        position: absolute;
+        left: 8%;
+        bottom: 25%;
+        z-index: 36;
+        width: 89%;
+        aspect-ratio: 232 / 118;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 0;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        overflow: visible;
+        transform-origin: 50% 100%;
+        animation: photo-choice-in 120ms steps(2, end) both;
+      }
+
+      .photo-choice-reference {
+        position: absolute;
+        top: -211.864%;
+        left: -293.534%;
+        z-index: 0;
+        width: 405.603%;
+        max-width: none;
+        height: auto;
+        display: block;
+        pointer-events: none;
+        user-select: none;
+        -webkit-user-drag: none;
+      }
+
+      .photo-choice-crop {
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        overflow: hidden;
+      }
+
+      .photo-choice-plus {
+        position: absolute;
+        top: -0.6em;
+        right: -0.5em;
+        z-index: 2;
+        color: #ddea17;
+        font-family: Arial Black, Arial, sans-serif;
+        font-size: clamp(17px, 6.1cqw, 33px);
+        font-weight: 900;
+        line-height: 1;
+        -webkit-text-stroke: clamp(1px, 0.32cqw, 2px) #111;
+        text-shadow:
+          clamp(1px, 0.32cqw, 2px) 0 #111,
+          0 clamp(1px, 0.32cqw, 2px) #111;
+        pointer-events: none;
+      }
+
+      .photo-choice-sheet[hidden] {
+        display: none;
+      }
+
+      .photo-choice-action {
+        position: relative;
+        z-index: 1;
+        min-height: 0;
+        border: 0;
+        padding: 0;
+        background: transparent;
+        color: transparent;
+        cursor: pointer;
+        font-size: 0;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .photo-choice-action:active {
+        background: rgba(217, 234, 23, 0.16);
+      }
+
+      .photo-choice-action:focus-visible {
+        outline: 2px solid #ddea17;
+        outline-offset: 2px;
+      }
+
+      .popup-festival .photo-choice-sheet {
+        left: 4%;
+        width: 84%;
+      }
+
+      .native-photo-input {
+        position: fixed;
+        width: 1px;
+        height: 1px;
+        margin: -1px;
+        padding: 0;
+        border: 0;
+        clip: rect(0 0 0 0);
+        clip-path: inset(50%);
+        overflow: hidden;
+        white-space: nowrap;
+      }
+
+      .popup-card.is-opening,
+      .popup-card.is-open {
+        visibility: visible;
+        pointer-events: auto;
+      }
+
+      .popup-card.is-opening {
+        animation: card-in 310ms var(--feedback-ease) forwards;
+      }
+
+      .popup-card.is-open {
+        transform: translate3d(-50%, -50%, 0) scale(1);
+        opacity: 1;
+      }
+
+      .popup-card.is-closing {
+        visibility: visible;
+        pointer-events: none;
+        animation: card-out 250ms cubic-bezier(0.55, 0, 0.74, 0.22) forwards;
+      }
+
+      @keyframes card-in {
+        0% {
+          opacity: 0;
+          transform: translate3d(-50%, -50%, 0) scale(0.72);
+        }
+        58% {
+          opacity: 1;
+          transform: translate3d(-50%, -50%, 0) scale(1.035);
+        }
+        100% {
+          opacity: 1;
+          transform: translate3d(-50%, -50%, 0) scale(1);
+        }
+      }
+
+      @keyframes map-foreground-enter {
+        0% {
+          opacity: 0;
+          transform: translate3d(0, 10px, 0) scale(0.985);
+        }
+
+        100% {
+          opacity: 1;
+          transform: translate3d(0, 0, 0) scale(1);
+        }
+      }
+
+      @keyframes card-out {
+        0% {
+          opacity: 1;
+          transform: translate3d(-50%, -50%, 0) scale(1);
+        }
+        100% {
+          opacity: 0;
+          transform: translate3d(-50%, -50%, 0) scale(0.72);
+        }
+      }
+
+      @keyframes feedback-press {
+        0% {
+          transform: scale(1);
+        }
+        45% {
+          transform: scale(0.94);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      @keyframes insight-page-in {
+        0% {
+          opacity: 0;
+          transform: translate3d(0, 2%, 0) scale(0.96);
+        }
+        70% {
+          opacity: 1;
+          transform: translate3d(0, 0, 0) scale(1.012);
+        }
+        100% {
+          opacity: 1;
+          transform: translate3d(0, 0, 0) scale(1);
+        }
+      }
+
+      @keyframes insight-page-out {
+        0% {
+          opacity: 1;
+          transform: translate3d(0, 0, 0) scale(1);
+        }
+        100% {
+          opacity: 0;
+          transform: translate3d(0, 1.5%, 0) scale(0.97);
+        }
+      }
+
+      @keyframes partner-page-in {
+        0% {
+          opacity: 0;
+          transform: scale(0.97);
+        }
+        72% {
+          opacity: 1;
+          transform: scale(1.01);
+        }
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+
+      @keyframes partner-page-out {
+        0% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        100% {
+          opacity: 0;
+          transform: scale(1.035);
+        }
+      }
+
+      @keyframes poster-page-in {
+        0% {
+          opacity: 0;
+          transform: translate3d(0, 1.5%, 0) scale(0.96);
+        }
+        72% {
+          opacity: 1;
+          transform: translate3d(0, 0, 0) scale(1.012);
+        }
+        100% {
+          opacity: 1;
+          transform: translate3d(0, 0, 0) scale(1);
+        }
+      }
+
+      @keyframes poster-page-out {
+        0% {
+          opacity: 1;
+          transform: translate3d(0, 0, 0) scale(1);
+        }
+        100% {
+          opacity: 0;
+          transform: translate3d(0, 1.5%, 0) scale(0.97);
+        }
+      }
+
+      @keyframes insight-detail-in {
+        0% {
+          opacity: 0;
+          transform: translate3d(var(--detail-offset-x), var(--detail-offset-y), 0)
+            scale(0.92);
+        }
+
+        100% {
+          opacity: 1;
+          transform: translate3d(0, 0, 0) scale(1);
+        }
+      }
+
+      @keyframes insight-detail-out {
+        0% {
+          opacity: 1;
+          transform: translate3d(0, 0, 0) scale(1);
+        }
+
+        100% {
+          opacity: 0;
+          transform: translate3d(var(--detail-offset-x), var(--detail-offset-y), 0)
+            scale(0.92);
+        }
+      }
+
+      @keyframes photo-choice-in {
+        0% {
+          opacity: 0;
+          transform: translate3d(0, 4%, 0) scale(0.92);
+        }
+        100% {
+          opacity: 1;
+          transform: translate3d(0, 0, 0) scale(1);
+        }
+      }
+
+      @keyframes checkmark-drop {
+        0% {
+          opacity: 0;
+          filter: blur(1px);
+          transform: translate3d(-50%, -780%, 0) scale(8.5);
+        }
+        9% {
+          opacity: 1;
+        }
+        78% {
+          opacity: 1;
+          filter: none;
+          transform: translate3d(-50%, -50%, 0) scale(1.13);
+        }
+        100% {
+          opacity: 1;
+          filter: none;
+          transform: translate3d(-50%, -50%, 0) scale(1);
+        }
+      }
+
+      @keyframes heart-bubble-in {
+        0% {
+          opacity: 0;
+          transform: translate3d(-50%, -50%, 0) scale(0.72);
+        }
+        62% {
+          opacity: 1;
+          transform: translate3d(-50%, -50%, 0) scale(1.05);
+        }
+        100% {
+          opacity: 1;
+          transform: translate3d(-50%, -50%, 0) scale(1);
+        }
+      }
+
+      @keyframes taskbar-popup-in {
+        0% {
+          opacity: 0;
+          transform: translate3d(0, 0, 0) scale(0.94);
+        }
+        58% {
+          opacity: 1;
+          transform: translate3d(0, 0, 0) scale(1.012);
+        }
+        100% {
+          opacity: 1;
+          transform: translate3d(0, 0, 0) scale(1);
+        }
+      }
+
+      @keyframes taskbar-popup-out {
+        0% {
+          opacity: 1;
+          transform: translate3d(0, 0, 0) scale(1);
+        }
+        100% {
+          opacity: 0;
+          transform: translate3d(0, 0, 0) scale(0.94);
+        }
+      }
+
+      @keyframes taskbar-heart-reveal {
+        0% {
+          background-position: 0 0;
+        }
+        100% {
+          background-position: 100% 0;
+        }
+      }
+
+      .popup-ai {
+        --x: 82.4%;
+        --y: 14.1%;
+        --w: 34%;
+        --origin: 0% 50%;
+      }
+
+      .popup-product {
+        --x: 38.2%;
+        --y: 30.2%;
+        --w: 34%;
+        --origin: 100% 50%;
+      }
+
+      .popup-expert {
+        --x: 74.6%;
+        --y: 49%;
+        --w: 34%;
+        --origin: 0% 50%;
+      }
+
+      .popup-festival {
+        --x: 18.2%;
+        --y: 68%;
+        --w: 32.5%;
+        --origin: 100% 50%;
+      }
+
+      .popup-opentalk {
+        --x: 78.6%;
+        --y: 88.2%;
+        --w: 32.5%;
+        --origin: 0% 36%;
+      }
+
+      /* Keep the supplied raster artwork smooth when it is scaled on phones. */
+      .map-art,
+      .intro-video,
+      .popup-art,
+      .heart-bubble img,
+      .taskbar-popup-art,
+      .taskbar-heart-state,
+      .taskbar-heart-reveal {
+        image-rendering: auto;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .map-art,
+        .popup-card.is-opening,
+        .popup-card.is-closing,
+        .heart-bubble.is-visible,
+        .taskbar-popup-layer.is-visible,
+        .taskbar-popup-layer.is-closing,
+        .insight-page-layer.is-entering,
+        .insight-page-layer.is-closing,
+        .partner-page-layer.is-entering,
+        .partner-page-layer.is-closing,
+        .poster-page-layer.is-entering,
+        .poster-page-layer.is-closing,
+        .insight-detail-card.is-opening,
+        .insight-detail-card.is-closing,
+        .feedback-press {
+          animation-duration: 1ms;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="canvas-stage" aria-label="Canva design replica">
+      <div class="map-frame">
+        <img
+          class="map-art"
+          src="assets/canva-poster-decorated-transparent.png"
+          width="941"
+          height="1672"
+          alt=""
+          aria-hidden="true"
+          draggable="false"
+        />
+        <div class="page-gmi-logo" role="img" aria-label="GMI"></div>
+        <img
+          class="poster-sign"
+          src="assets/poster-sign-cutout.png"
+          width="330"
+          height="266"
+          alt=""
+          aria-hidden="true"
+          draggable="false"
+        />
+        <button
+          class="poster-sign-hotspot"
+          type="button"
+          data-poster-target
+          aria-label="Generate poster"
+        ></button>
+
+        <div class="checkmark-layer" data-checkmark-layer aria-hidden="true"></div>
+
+        <article class="popup-card popup-ai" data-popup="ai" aria-hidden="true">
+          <img
+            class="popup-art"
+            src="assets/popup-ai.png"
+            width="624"
+            height="630"
+            alt=""
+            draggable="false"
+          />
+          <button
+            class="checkin-hotspot"
+            type="button"
+            data-checkin-button
+            aria-label="Check in AI challenge"
+          ></button>
+          <div class="photo-choice-sheet" data-photo-choice-sheet hidden aria-hidden="true">
+            <span class="photo-choice-crop"><img class="photo-choice-reference" src="assets/photo-choice-reference.png" alt="" aria-hidden="true" draggable="false" /></span>
+            <span class="photo-choice-plus" aria-hidden="true">+</span>
+            <button class="photo-choice-action" type="button" data-photo-library-choice>从相册选择</button>
+            <button class="photo-choice-action" type="button" data-photo-camera-choice>打开相机</button>
+          </div>
+        </article>
+
+        <article
+          class="popup-card popup-product"
+          data-popup="product"
+          aria-hidden="true"
+        >
+          <img
+            class="popup-art"
+            src="assets/popup-product.png"
+            width="603"
+            height="646"
+            alt=""
+            draggable="false"
+          />
+          <button
+            class="checkin-hotspot"
+            type="button"
+            data-checkin-button
+            aria-label="Check in product experience"
+          ></button>
+          <div class="photo-choice-sheet" data-photo-choice-sheet hidden aria-hidden="true">
+            <span class="photo-choice-crop"><img class="photo-choice-reference" src="assets/photo-choice-reference.png" alt="" aria-hidden="true" draggable="false" /></span>
+            <span class="photo-choice-plus" aria-hidden="true">+</span>
+            <button class="photo-choice-action" type="button" data-photo-library-choice>从相册选择</button>
+            <button class="photo-choice-action" type="button" data-photo-camera-choice>打开相机</button>
+          </div>
+        </article>
+
+        <article
+          class="popup-card popup-expert"
+          data-popup="expert"
+          aria-hidden="true"
+        >
+          <img
+            class="popup-art"
+            src="assets/popup-expert.png"
+            width="603"
+            height="623"
+            alt=""
+            draggable="false"
+          />
+          <button
+            class="checkin-hotspot"
+            type="button"
+            data-checkin-button
+            aria-label="Check in expert session"
+          ></button>
+          <div class="photo-choice-sheet" data-photo-choice-sheet hidden aria-hidden="true">
+            <span class="photo-choice-crop"><img class="photo-choice-reference" src="assets/photo-choice-reference.png" alt="" aria-hidden="true" draggable="false" /></span>
+            <span class="photo-choice-plus" aria-hidden="true">+</span>
+            <button class="photo-choice-action" type="button" data-photo-library-choice>从相册选择</button>
+            <button class="photo-choice-action" type="button" data-photo-camera-choice>打开相机</button>
+          </div>
+        </article>
+
+        <article
+          class="popup-card popup-festival"
+          data-popup="festival"
+          aria-hidden="true"
+        >
+          <img
+            class="popup-art"
+            src="assets/popup-festival.png"
+            width="564"
+            height="615"
+            alt=""
+            draggable="false"
+          />
+          <button
+            class="checkin-hotspot"
+            type="button"
+            data-checkin-button
+            aria-label="Check in creation festival"
+          ></button>
+          <div class="photo-choice-sheet" data-photo-choice-sheet hidden aria-hidden="true">
+            <span class="photo-choice-crop"><img class="photo-choice-reference" src="assets/photo-choice-reference.png" alt="" aria-hidden="true" draggable="false" /></span>
+            <span class="photo-choice-plus" aria-hidden="true">+</span>
+            <button class="photo-choice-action" type="button" data-photo-library-choice>从相册选择</button>
+            <button class="photo-choice-action" type="button" data-photo-camera-choice>打开相机</button>
+          </div>
+        </article>
+
+        <article
+          class="popup-card popup-opentalk"
+          data-popup="opentalk"
+          aria-hidden="true"
+        >
+          <img
+            class="popup-art"
+            src="assets/popup-opentalk.png"
+            width="564"
+            height="588"
+            alt=""
+            draggable="false"
+          />
+          <button
+            class="checkin-hotspot"
+            type="button"
+            data-checkin-button
+            aria-label="Check in OpenTalk"
+          ></button>
+          <div class="photo-choice-sheet" data-photo-choice-sheet hidden aria-hidden="true">
+            <span class="photo-choice-crop"><img class="photo-choice-reference" src="assets/photo-choice-reference.png" alt="" aria-hidden="true" draggable="false" /></span>
+            <span class="photo-choice-plus" aria-hidden="true">+</span>
+            <button class="photo-choice-action" type="button" data-photo-library-choice>从相册选择</button>
+            <button class="photo-choice-action" type="button" data-photo-camera-choice>打开相机</button>
+          </div>
+        </article>
+
+        <div class="heart-bubble" data-heart-bubble aria-hidden="true">
+          <img
+            src="assets/heart-bubble.png"
+            width="807"
+            height="364"
+            alt=""
+            draggable="false"
+          />
+        </div>
+
+        <div
+          class="taskbar-popup-layer"
+          data-taskbar-popup-layer
+          aria-hidden="true"
+        >
+          <img
+            class="taskbar-popup-art"
+            src="assets/taskbar-popup-frame.png?v=cutout2"
+            width="940"
+            height="1672"
+            alt=""
+            draggable="false"
+          />
+          <div class="taskbar-progress-label" data-taskbar-progress>0/5</div>
+          <div class="taskbar-heart-stage" aria-hidden="true">
+            <img
+              class="taskbar-heart-state"
+              data-taskbar-heart-state
+              src="assets/taskbar-hearts-state-0.png?v=exact2"
+              width="940"
+              height="320"
+              alt=""
+              draggable="false"
+            />
+            <div
+              class="taskbar-heart-reveal"
+              data-taskbar-heart-reveal
+            ></div>
+          </div>
+          <button
+            class="taskbar-close-hotspot"
+            type="button"
+            data-taskbar-close
+            aria-label="Close taskbar popup"
+          ></button>
+        </div>
+
+        <section
+          class="insight-page-layer"
+          data-insight-layer
+          aria-hidden="true"
+        >
+          <img
+            class="insight-page-art"
+            src="assets/insight-page-report-map.png"
+            width="941"
+            height="1672"
+            alt=""
+            draggable="false"
+          />
+          <div class="page-gmi-logo page-gmi-logo-insight" role="img" aria-label="GMI"></div>
+          <button class="insight-detail-target insight-detail-target-1" type="button" data-insight-detail-target="1" aria-label="Open white paper details"></button>
+          <button class="insight-detail-target insight-detail-target-2" type="button" data-insight-detail-target="2" aria-label="Open global AI sharing details"></button>
+          <button class="insight-detail-target insight-detail-target-3" type="button" data-insight-detail-target="3" aria-label="Open AI Agent sharing details"></button>
+
+          <article class="insight-detail-card insight-detail-card-1" data-insight-detail="1" aria-hidden="true">
+            <img class="insight-detail-art" src="assets/insight-detail-1.png" width="435" height="338" alt="" draggable="false" />
+            <button class="insight-detail-action insight-copy-hotspot" type="button" data-insight-copy-command aria-label="Copy white paper command"></button>
+          </article>
+
+          <article class="insight-detail-card insight-detail-card-2" data-insight-detail="2" aria-hidden="true">
+            <img class="insight-detail-art" src="assets/insight-detail-2.png" width="370" height="390" alt="" draggable="false" />
+            <button class="insight-detail-action insight-photo-plus-hotspot" type="button" data-insight-photo-plus aria-label="Add global AI sharing photo"></button>
+            <div class="photo-choice-sheet insight-photo-choice-sheet" data-insight-photo-choice-sheet hidden aria-hidden="true">
+              <span class="photo-choice-crop"><img class="photo-choice-reference" src="assets/photo-choice-reference.png" alt="" aria-hidden="true" draggable="false" /></span>
+              <span class="photo-choice-plus" aria-hidden="true">+</span>
+              <button class="photo-choice-action" type="button" data-insight-photo-library-choice aria-label="Choose from photo library"></button>
+              <button class="photo-choice-action" type="button" data-insight-photo-camera-choice aria-label="Open camera"></button>
+            </div>
+          </article>
+
+          <article class="insight-detail-card insight-detail-card-3" data-insight-detail="3" aria-hidden="true">
+            <img class="insight-detail-art" src="assets/insight-detail-3.png" width="402" height="358" alt="" draggable="false" />
+            <button class="insight-detail-action insight-photo-plus-hotspot" type="button" data-insight-photo-plus aria-label="Add AI Agent sharing photo"></button>
+            <div class="photo-choice-sheet insight-photo-choice-sheet" data-insight-photo-choice-sheet hidden aria-hidden="true">
+              <span class="photo-choice-crop"><img class="photo-choice-reference" src="assets/photo-choice-reference.png" alt="" aria-hidden="true" draggable="false" /></span>
+              <span class="photo-choice-plus" aria-hidden="true">+</span>
+              <button class="photo-choice-action" type="button" data-insight-photo-library-choice aria-label="Choose from photo library"></button>
+              <button class="photo-choice-action" type="button" data-insight-photo-camera-choice aria-label="Open camera"></button>
+            </div>
+          </article>
+          <button
+            class="insight-close-hotspot"
+            type="button"
+            data-insight-close
+            aria-label="Close insight moments"
+          ></button>
+          <button
+            class="insight-poster-hotspot"
+            type="button"
+            data-insight-poster-target
+            aria-label="Generate poster"
+          ></button>
+        </section>
+
+        <section class="partner-page-layer" data-partner-layer aria-hidden="true">
+          <img
+            class="partner-page-art"
+            src="assets/partner-page-new.png"
+            width="941"
+            height="1672"
+            alt=""
+            draggable="false"
+          />
+          <button
+            class="partner-poster-hotspot"
+            type="button"
+            data-partner-poster-target
+            aria-label="Generate poster"
+          ></button>
+          <button
+            class="partner-close-hotspot"
+            type="button"
+            data-partner-close
+            aria-label="Return to main page"
+          ></button>
+        </section>
+
+        <section class="poster-page-layer" data-poster-page-layer aria-hidden="true">
+          <img
+            class="poster-page-art"
+            src="assets/share-poster-page.png"
+            width="941"
+            height="1672"
+            alt=""
+            draggable="false"
+          />
+          <div class="poster-photo-layer" data-poster-photo-layer aria-hidden="true"></div>
+          <img
+            class="poster-composite-image"
+            data-poster-composite-image
+            alt="GMI Cloud 打卡行动地图海报"
+            hidden
+          />
+          <button
+            class="poster-return-side poster-return-side-left"
+            type="button"
+            data-poster-return
+            aria-label="Return to main page"
+          ></button>
+          <button
+            class="poster-return-side poster-return-side-right"
+            type="button"
+            data-poster-return
+            aria-label="Return to main page"
+          ></button>
+          <div class="poster-actions-backdrop" aria-hidden="true"></div>
+          <div class="poster-actions">
+            <button
+              class="poster-action-button"
+              type="button"
+              data-poster-save
+              aria-label="保存海报"
+            >保存海报</button>
+            <button
+              class="poster-action-button"
+              type="button"
+              data-poster-copy
+              aria-label="复制文案"
+            >复制文案</button>
+          </div>
+        </section>
+
+        <button
+          class="hotspot hotspot-taskbar"
+          type="button"
+          data-taskbar-target
+          aria-label="Open taskbar collection"
+        ></button>
+        <button
+          class="hotspot hotspot-ai"
+          type="button"
+          data-popup-target="ai"
+          aria-label="Open AI challenge"
+        ></button>
+        <button
+          class="hotspot hotspot-product"
+          type="button"
+          data-popup-target="product"
+          aria-label="Open product experience"
+        ></button>
+        <button
+          class="hotspot hotspot-expert"
+          type="button"
+          data-popup-target="expert"
+          aria-label="Open expert session"
+        ></button>
+        <button
+          class="hotspot hotspot-festival"
+          type="button"
+          data-popup-target="festival"
+          aria-label="Open creation festival"
+        ></button>
+        <button
+          class="hotspot hotspot-opentalk"
+          type="button"
+          data-popup-target="opentalk"
+          aria-label="Open OpenTalk"
+        ></button>
+        <button
+          class="hotspot hotspot-panda"
+          type="button"
+          data-panda-target
+          aria-label="Show panda hearts"
+        ></button>
+        <button
+          class="hotspot hotspot-insight"
+          type="button"
+          data-insight-target
+          aria-label="Open insight moments"
+        ></button>
+        <button
+          class="hotspot hotspot-insight-globe"
+          type="button"
+          data-insight-globe-target
+          aria-label="Open insight moments from globe"
+        ></button>
+        <button
+          class="hotspot hotspot-partner"
+          type="button"
+          data-partner-target
+          aria-label="Open partner activities"
+        ></button>
+      </div>
+    </main>
+
+    <input class="native-photo-input" data-photo-library-input type="file" accept="image/*" tabindex="-1" />
+    <input class="native-photo-input" data-photo-camera-input type="file" accept="image/*" capture="environment" tabindex="-1" />
+    <input class="native-photo-input" data-insight-photo-library-input type="file" accept="image/*" tabindex="-1" />
+    <input class="native-photo-input" data-insight-photo-camera-input type="file" accept="image/*" capture="environment" tabindex="-1" />
+
+    <script>
+      const introLayer = document.querySelector("[data-intro-layer]");
+      const introVideo = introLayer?.querySelector("video");
+      const heartBubble = document.querySelector("[data-heart-bubble]");
+      const pandaButton = document.querySelector("[data-panda-target]");
+      const insightButton = document.querySelector("[data-insight-target]");
+      const insightGlobeButton = document.querySelector("[data-insight-globe-target]");
+      const insightLayer = document.querySelector("[data-insight-layer]");
+      const insightCloseButton = document.querySelector("[data-insight-close]");
+      const insightPosterTargetButton = document.querySelector(
+        "[data-insight-poster-target]"
+      );
+      const partnerButton = document.querySelector("[data-partner-target]");
+      const partnerLayer = document.querySelector("[data-partner-layer]");
+      const partnerCloseButton = document.querySelector("[data-partner-close]");
+      const partnerPosterTargetButton = document.querySelector(
+        "[data-partner-poster-target]"
+      );
+      const posterTargetButton = document.querySelector("[data-poster-target]");
+      const posterPageLayer = document.querySelector("[data-poster-page-layer]");
+      const posterPhotoLayer = document.querySelector("[data-poster-photo-layer]");
+      const posterSaveButton = document.querySelector("[data-poster-save]");
+      const posterCopyButton = document.querySelector("[data-poster-copy]");
+      const posterCompositeImage = document.querySelector("[data-poster-composite-image]");
+      const posterReturnButtons = document.querySelectorAll("[data-poster-return]");
+      const insightDetailTargets = document.querySelectorAll(
+        "[data-insight-detail-target]"
+      );
+      const insightDetailCards = new Map(
+        Array.from(document.querySelectorAll("[data-insight-detail]")).map(
+          (card) => [card.dataset.insightDetail, card]
+        )
+      );
+      const insightCopyCommandButton = document.querySelector(
+        "[data-insight-copy-command]"
+      );
+      const insightPhotoPlusButtons = document.querySelectorAll(
+        "[data-insight-photo-plus]"
+      );
+      const insightPhotoChoiceSheets = document.querySelectorAll(
+        "[data-insight-photo-choice-sheet]"
+      );
+      const insightPhotoLibraryChoices = document.querySelectorAll(
+        "[data-insight-photo-library-choice]"
+      );
+      const insightPhotoCameraChoices = document.querySelectorAll(
+        "[data-insight-photo-camera-choice]"
+      );
+      const insightPhotoLibraryInput = document.querySelector(
+        "[data-insight-photo-library-input]"
+      );
+      const insightPhotoCameraInput = document.querySelector(
+        "[data-insight-photo-camera-input]"
+      );
+      const taskbarButton = document.querySelector("[data-taskbar-target]");
+      const taskbarLayer = document.querySelector("[data-taskbar-popup-layer]");
+      const taskbarCloseButton = document.querySelector("[data-taskbar-close]");
+      const taskbarProgress = document.querySelector("[data-taskbar-progress]");
+      const taskbarHeartState = document.querySelector(
+        "[data-taskbar-heart-state]"
+      );
+      const taskbarHeartReveal = document.querySelector(
+        "[data-taskbar-heart-reveal]"
+      );
+      const checkmarkLayer = document.querySelector("[data-checkmark-layer]");
+      const popupButtons = document.querySelectorAll("[data-popup-target]");
+      const checkinButtons = document.querySelectorAll("[data-checkin-button]");
+      const photoChoiceSheets = document.querySelectorAll("[data-photo-choice-sheet]");
+      const photoLibraryChoices = document.querySelectorAll("[data-photo-library-choice]");
+      const photoCameraChoices = document.querySelectorAll("[data-photo-camera-choice]");
+      const photoLibraryInput = document.querySelector("[data-photo-library-input]");
+      const photoCameraInput = document.querySelector("[data-photo-camera-input]");
+      const taskbarStateAssets = Array.from(
+        { length: 6 },
+        (_, index) => `assets/taskbar-hearts-state-${index}.png?v=exact2`
+      );
+      const taskbarRevealAssets = Array.from(
+        { length: 5 },
+        (_, index) => `assets/taskbar-heart-reveal-${index + 1}.png?v=exact2`
+      );
+      const checkmarkAsset = "assets/checkmark-green.png?v=2";
+      const checkmarkPositions = Object.freeze({
+        ai: { x: "66.49%", y: "21.29%" },
+        product: { x: "75.96%", y: "37.26%" },
+        expert: { x: "53.51%", y: "49.94%" },
+        festival: { x: "48.62%", y: "73.27%" },
+        opentalk: { x: "58.3%", y: "91.21%" },
+      });
+      const PROGRESS_STORAGE_KEY = "gmi-cloud-checkin-progress-v1";
+      const PHOTO_DATABASE_NAME = "gmi-cloud-checkin-photos-v1";
+      const PHOTO_STORE_NAME = "photos";
+      const validCheckinIds = new Set(Object.keys(checkmarkPositions));
+      const popupCards = new Map(
+        Array.from(document.querySelectorAll(".popup-card")).map((card) => [
+          card.dataset.popup,
+          card,
+        ])
+      );
+      let activePopupId = null;
+      let introFinished = false;
+      let insightPageState = "closed";
+      let partnerPageState = "closed";
+      let posterPageState = "closed";
+      let taskbarPopupState = "closed";
+      let checkinCount = 0;
+      let revealedCheckinCount = 0;
+      let activePhotoCheckinButton = null;
+      let activeInsightPhotoDetailId = null;
+      let activeInsightDetailId = null;
+      const completedCheckins = new Set();
+      const pendingCheckins = new Set();
+      const droppingCheckins = new Set();
+      const selectedCheckinPhotos = new Map();
+      const selectedInsightPhotos = new Map();
+      let posterPhotoUrls = [];
+      let posterExportUrl = "";
+      let posterExportBlob = null;
+      let posterExportPromise = null;
+      let photoDatabasePromise = null;
+      let posterCopyResetTimer = 0;
+      const POSTER_SHARE_TEXT = "我在 WAIC 2026 现场解锁了 GMI Cloud 展位打卡地图，跟着路线体验产品、看现场分享、参与互动，也记录下今天的逛展足迹📍快来 H1-B825 与我一同参与！\n#WAIC2026 #GMICloud #GMICloudInferenceEngine #WAIC2026GMICloud #全球AI探路者计划";
+      const posterPhotoSlots = Object.freeze([
+        { id: "insight-2", pageX: 13.306106, pageY: 35.885167, pageW: 14.849665, pageH: 10.520989, sourceX: 0.882168, sourceY: 38.461538, sourceW: 19.848771, sourceH: 12.301464, sourceRadius: 24 },
+        { id: "insight-3", pageX: 28.721473, pageY: 35.885167, pageW: 14.613956, pageH: 10.547624, sourceX: 21.487083, sourceY: 38.461538, sourceW: 19.533711, sourceH: 12.332607, sourceRadius: 24 },
+        { id: "ai", pageX: 71.809073, pageY: 31.889855, pageW: 13.718262, pageH: 10.334541, sourceX: 79.080025, sourceY: 33.790097, sourceW: 18.336484, sourceH: 12.083463, sourceRadius: 26 },
+        { id: "product", pageX: 71.809073, pageY: 44.4085, pageW: 13.718262, pageH: 10.387812, sourceX: 79.080025, sourceY: 48.427281, sourceW: 18.336484, sourceH: 12.145749, sourceRadius: 21 },
+        { id: "expert", pageX: 28.438622, pageY: 48.776708, pageW: 13.152561, pageH: 10.307905, sourceX: 21.109011, sourceY: 53.534724, sourceW: 17.58034, sourceH: 12.05232, sourceRadius: 25 },
+        { id: "festival", pageX: 71.809073, pageY: 64.33179, pageW: 13.576837, pageH: 9.828468, sourceX: 79.080025, sourceY: 71.722205, sourceW: 18.147448, sourceH: 11.491747, sourceRadius: 24 },
+        { id: "opentalk", pageX: 26.317242, pageY: 66.356082, pageW: 14.001113, pageH: 9.881739, sourceX: 18.273472, sourceY: 74.089069, sourceW: 18.714556, sourceH: 11.554033, sourceRadius: 21 },
+      ]);
+      const feedbackRoot = document.documentElement;
+      const feedbackState = {
+        audioContext: null,
+        masterGain: null,
+        isReady: false,
+      };
+
+      const feedbackPatterns = Object.freeze({
+        tap: [[540, 0.045, 0.025, "sine"]],
+        open: [[430, 0.05, 0.03, "triangle"], [610, 0.07, 0.025, "triangle"]],
+        close: [[330, 0.06, 0.025, "sine"]],
+        capture: [[610, 0.045, 0.03, "square"], [860, 0.08, 0.025, "triangle"]],
+        success: [[523, 0.06, 0.03, "triangle"], [659, 0.07, 0.035, "triangle"], [784, 0.11, 0.04, "triangle"]],
+        reward: [[660, 0.06, 0.03, "triangle"], [880, 0.12, 0.045, "triangle"]],
+      });
+      const CHECKMARK_DROP_DURATION_MS = 520;
+      const CHECKMARK_IMPACT_RATIO = 0.78;
+
+      function unlockFeedback() {
+        feedbackState.isReady = true;
+        feedbackRoot.dataset.feedbackReady = "true";
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return null;
+        try {
+          if (!feedbackState.audioContext) {
+            feedbackState.audioContext = new AudioContext();
+            feedbackState.masterGain = feedbackState.audioContext.createGain();
+            feedbackState.masterGain.gain.value = 2.1;
+            feedbackState.masterGain.connect(feedbackState.audioContext.destination);
+          }
+          feedbackState.audioContext.resume().then(
+            () => {
+              feedbackRoot.dataset.feedbackState = "running";
+            },
+            () => {
+              feedbackRoot.dataset.feedbackState = "blocked";
+            }
+          );
+        } catch {
+          feedbackState.audioContext = null;
+          feedbackState.masterGain = null;
+          feedbackRoot.dataset.feedbackState = "unavailable";
+        }
+        return feedbackState.audioContext;
+      }
+
+      function primeFeedback() {
+        unlockFeedback();
+      }
+
+      function withFeedbackContext(callback) {
+        const context = unlockFeedback();
+        if (!context || !feedbackState.masterGain) return;
+        const playWhenReady = () => {
+          if (context.state !== "running") return;
+          callback(context, feedbackState.masterGain);
+        };
+        if (context.state === "running") {
+          playWhenReady();
+        } else {
+          context.resume().then(playWhenReady).catch(() => {});
+        }
+      }
+
+      function playFeedback(kind) {
+        const notes = feedbackPatterns[kind];
+        if (!notes) return;
+        withFeedbackContext((context, output) => {
+          const start = context.currentTime + 0.005;
+          notes.forEach(([frequency, duration, volume, type, delay], index) => {
+            try {
+              const oscillator = context.createOscillator();
+              const gain = context.createGain();
+              const noteStart = start + (delay ?? index * 0.055);
+              oscillator.type = type;
+              oscillator.frequency.setValueAtTime(frequency, noteStart);
+              gain.gain.setValueAtTime(0.0001, noteStart);
+              gain.gain.exponentialRampToValueAtTime(volume, noteStart + 0.008);
+              gain.gain.exponentialRampToValueAtTime(volume * 0.7, noteStart + duration * 0.4);
+              gain.gain.exponentialRampToValueAtTime(0.0001, noteStart + duration);
+              oscillator.connect(gain).connect(output);
+              oscillator.start(noteStart);
+              oscillator.stop(noteStart + duration + 0.01);
+            } catch {}
+          });
+        });
+      }
+
+      function playStampFeedback() {
+        withFeedbackContext((context, output) => {
+          const start = context.currentTime + 0.005;
+          try {
+          const thud = context.createOscillator();
+          const thudGain = context.createGain();
+          thud.type = "triangle";
+          thud.frequency.setValueAtTime(150, start);
+          thud.frequency.exponentialRampToValueAtTime(72, start + 0.06);
+          thudGain.gain.setValueAtTime(0.0001, start);
+          thudGain.gain.exponentialRampToValueAtTime(0.12, start + 0.006);
+          thudGain.gain.exponentialRampToValueAtTime(0.0001, start + 0.072);
+          thud.connect(thudGain).connect(output);
+          thud.start(start);
+          thud.stop(start + 0.082);
+
+          const noiseLength = Math.ceil(context.sampleRate * 0.055);
+          const noiseBuffer = context.createBuffer(1, noiseLength, context.sampleRate);
+          const noiseData = noiseBuffer.getChannelData(0);
+          for (let index = 0; index < noiseLength; index += 1) {
+            noiseData[index] = (Math.random() * 2 - 1) * (1 - index / noiseLength);
+          }
+          const paper = context.createBufferSource();
+          const paperFilter = context.createBiquadFilter();
+          const paperGain = context.createGain();
+          paper.buffer = noiseBuffer;
+          paperFilter.type = "lowpass";
+          paperFilter.frequency.setValueAtTime(1150, start);
+          paperGain.gain.setValueAtTime(0.05, start);
+          paperGain.gain.exponentialRampToValueAtTime(0.0001, start + 0.052);
+          paper.connect(paperFilter).connect(paperGain).connect(output);
+          paper.start(start);
+          } catch {}
+        });
+      }
+
+      document.addEventListener("pointerdown", primeFeedback, {
+        once: true,
+        passive: true,
+      });
+      document.addEventListener("touchstart", primeFeedback, {
+        once: true,
+        passive: true,
+      });
+
+      function pulseFeedback(element) {
+        if (!element) return;
+        element.classList.remove("feedback-press");
+        void element.offsetWidth;
+        element.classList.add("feedback-press");
+        element.addEventListener(
+          "animationend",
+          () => element.classList.remove("feedback-press"),
+          { once: true }
+        );
+      }
+
+      function vibrateFeedback(duration) {
+        if (typeof navigator.vibrate === "function") navigator.vibrate(duration);
+      }
+
+      function preloadAssets(sources) {
+        sources.forEach((src) => {
+          const image = new Image();
+          image.src = src;
+        });
+      }
+
+      preloadAssets([taskbarStateAssets[0], checkmarkAsset]);
+
+      const preloadRewardAssets = () => {
+        preloadAssets([
+          ...taskbarStateAssets.slice(1),
+          ...taskbarRevealAssets,
+        ]);
+      };
+
+      if ("requestIdleCallback" in window) {
+        window.requestIdleCallback(preloadRewardAssets, { timeout: 1400 });
+      } else {
+        window.setTimeout(preloadRewardAssets, 450);
+      }
+
+      function persistCheckinProgress() {
+        try {
+          localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify({
+            version: 1,
+            completedCheckins: Array.from(completedCheckins),
+            updatedAt: Date.now(),
+          }));
+        } catch {}
+      }
+
+      function readPersistedCheckins() {
+        try {
+          const stored = JSON.parse(localStorage.getItem(PROGRESS_STORAGE_KEY) || "null");
+          if (stored?.version !== 1 || !Array.isArray(stored.completedCheckins)) return [];
+          return stored.completedCheckins.filter((id) => validCheckinIds.has(id));
+        } catch {
+          return [];
+        }
+      }
+
+      function openPhotoDatabase() {
+        if (!("indexedDB" in window)) return Promise.resolve(null);
+        if (photoDatabasePromise) return photoDatabasePromise;
+        photoDatabasePromise = new Promise((resolve, reject) => {
+          const request = indexedDB.open(PHOTO_DATABASE_NAME, 1);
+          request.onupgradeneeded = () => {
+            const database = request.result;
+            if (!database.objectStoreNames.contains(PHOTO_STORE_NAME)) {
+              database.createObjectStore(PHOTO_STORE_NAME, { keyPath: "id" });
+            }
+          };
+          request.onsuccess = () => {
+            const database = request.result;
+            database.onversionchange = () => {
+              database.close();
+              photoDatabasePromise = null;
+            };
+            resolve(database);
+          };
+          request.onerror = () => reject(request.error);
+          request.onblocked = () => reject(new Error("Photo database is blocked"));
+        }).catch((error) => {
+          photoDatabasePromise = null;
+          throw error;
+        });
+        return photoDatabasePromise;
+      }
+
+      async function persistPhoto(id, file) {
+        if (!id || !(file instanceof Blob)) return;
+        const database = await openPhotoDatabase();
+        if (!database) return;
+        await new Promise((resolve, reject) => {
+          const transaction = database.transaction(PHOTO_STORE_NAME, "readwrite");
+          transaction.objectStore(PHOTO_STORE_NAME).put({ id, file, updatedAt: Date.now() });
+          transaction.oncomplete = resolve;
+          transaction.onerror = () => reject(transaction.error);
+          transaction.onabort = () => reject(transaction.error);
+        });
+      }
+
+      async function loadPersistedPhotos() {
+        const database = await openPhotoDatabase();
+        if (!database) return [];
+        return new Promise((resolve, reject) => {
+          const request = database
+            .transaction(PHOTO_STORE_NAME, "readonly")
+            .objectStore(PHOTO_STORE_NAME)
+            .getAll();
+          request.onsuccess = () => resolve(request.result || []);
+          request.onerror = () => reject(request.error);
+        });
+      }
+
+      async function restorePersistedState() {
+        const restoredCheckins = readPersistedCheckins();
+        restoredCheckins.forEach((id) => completedCheckins.add(id));
+        checkinCount = completedCheckins.size;
+        revealedCheckinCount = checkinCount;
+        restoredCheckins.forEach((id) => renderCompletedCheckmark(id));
+        renderCheckinProgress();
+
+        const storedPhotos = await loadPersistedPhotos();
+        storedPhotos.forEach(({ id, file }) => {
+          if (!(file instanceof Blob)) return;
+          if (id === "insight-2" || id === "insight-3") {
+            const detailId = id.slice("insight-".length);
+            if (!selectedInsightPhotos.has(detailId)) {
+              selectedInsightPhotos.set(detailId, { file });
+            }
+            return;
+          }
+          if (validCheckinIds.has(id) && !selectedCheckinPhotos.has(id)) {
+            selectedCheckinPhotos.set(id, { file });
+          }
+        });
+        renderPosterPhotos();
+      }
+
+      function finishIntro() {
+        if (!introLayer || introFinished) return;
+        introFinished = true;
+        introLayer.classList.add("is-hidden");
+        introLayer.classList.add("is-gone");
+        if (introVideo) {
+          introVideo.pause();
+          introVideo.removeAttribute("src");
+          introVideo.load();
+        }
+        introLayer.remove();
+      }
+
+      if (introVideo) {
+        introVideo.muted = true;
+        introVideo.defaultMuted = true;
+        introVideo.addEventListener("timeupdate", () => {
+          if (!Number.isFinite(introVideo.duration)) return;
+          if (introVideo.currentTime >= introVideo.duration - 0.08) {
+            finishIntro();
+          }
+        });
+        introVideo.addEventListener("ended", finishIntro, { once: true });
+        introVideo.addEventListener("error", finishIntro, { once: true });
+        introVideo.addEventListener(
+          "loadedmetadata",
+          () => {
+            if (!Number.isFinite(introVideo.duration)) return;
+            window.setTimeout(finishIntro, introVideo.duration * 1000 + 30);
+          },
+          { once: true }
+        );
+        introVideo.play().catch(finishIntro);
+      }
+
+      function finishInsightClose() {
+        if (!insightLayer || insightPageState !== "closing") return;
+        insightPageState = "closed";
+        closeInsightDetails();
+        insightLayer.classList.remove("is-closing", "is-open", "is-entering");
+        insightLayer.setAttribute("aria-hidden", "true");
+      }
+
+      function finishPartnerClose() {
+        if (!partnerLayer || partnerPageState !== "closing") return;
+        partnerPageState = "closed";
+        partnerLayer.classList.remove("is-closing", "is-open", "is-entering");
+        partnerLayer.setAttribute("aria-hidden", "true");
+      }
+
+      function finishPosterClose() {
+        if (!posterPageLayer || posterPageState !== "closing") return;
+        posterPageState = "closed";
+        posterPageLayer.classList.remove("is-closing", "is-open", "is-entering");
+        posterPageLayer.setAttribute("aria-hidden", "true");
+      }
+
+      function getPosterPhotoFile(id) {
+        if (id === "insight-2") return selectedInsightPhotos.get("2")?.file;
+        if (id === "insight-3") return selectedInsightPhotos.get("3")?.file;
+        return selectedCheckinPhotos.get(id)?.file;
+      }
+
+      function clearPosterPhotoUrls() {
+        posterPhotoUrls.forEach((url) => URL.revokeObjectURL(url));
+        posterPhotoUrls = [];
+      }
+
+      function clearPosterExportUrl() {
+        if (posterExportUrl) URL.revokeObjectURL(posterExportUrl);
+        posterExportUrl = "";
+        posterExportBlob = null;
+        if (posterCompositeImage) {
+          posterCompositeImage.hidden = true;
+          posterCompositeImage.removeAttribute("src");
+        }
+        posterPageLayer?.setAttribute("data-export-ready", "false");
+      }
+
+      function renderPosterPhotos() {
+        if (!posterPhotoLayer) return;
+        clearPosterPhotoUrls();
+        clearPosterExportUrl();
+        posterPhotoLayer.replaceChildren();
+        posterPhotoSlots.forEach((slot) => {
+          const file = getPosterPhotoFile(slot.id);
+          if (!file) return;
+          const url = URL.createObjectURL(file);
+          posterPhotoUrls.push(url);
+          const photo = document.createElement("img");
+          const frame = document.createElement("div");
+          frame.className = "poster-photo-slot";
+          frame.style.setProperty("--poster-x", `${slot.pageX}%`);
+          frame.style.setProperty("--poster-y", `${slot.pageY}%`);
+          frame.style.setProperty("--poster-w", `${slot.pageW}%`);
+          frame.style.setProperty("--poster-h", `${slot.pageH}%`);
+          frame.style.setProperty(
+            "--poster-radius",
+            `${((slot.sourceRadius * 704) / 1587 / 941) * 100}cqw`
+          );
+          photo.src = url;
+          photo.alt = "";
+          photo.draggable = false;
+          frame.append(photo);
+          posterPhotoLayer.append(frame);
+        });
+      }
+
+      function openPosterPage() {
+        if (!posterPageLayer || posterPageState !== "closed") return;
+        finishIntro();
+        hideHeartBubble();
+        closePhotoChoices();
+        closeInsightDetails();
+        finishTaskbarPopup();
+        closeAllLevelPopups();
+        renderPosterPhotos();
+        preparePosterExport().catch(() => {});
+        posterPageState = "entering";
+        posterPageLayer.classList.remove("is-closing", "is-open");
+        posterPageLayer.classList.add("is-entering");
+        posterPageLayer.setAttribute("aria-hidden", "false");
+        playFeedback("open");
+      }
+
+      function settlePosterOpen() {
+        if (!posterPageLayer || posterPageState !== "entering") return;
+        posterPageState = "open";
+        posterPageLayer.classList.remove("is-entering");
+        posterPageLayer.classList.add("is-open");
+      }
+
+      function closePosterPage() {
+        if (!posterPageLayer || posterPageState === "closed" || posterPageState === "closing") {
+          return;
+        }
+        posterPageState = "closing";
+        posterPageLayer.classList.remove("is-entering", "is-open");
+        posterPageLayer.classList.add("is-closing");
+        posterPageLayer.setAttribute("aria-hidden", "true");
+        playFeedback("close");
+        window.setTimeout(finishPosterClose, 290);
+      }
+
+      function loadPosterImage(source) {
+        return new Promise((resolve, reject) => {
+          const image = new Image();
+          image.onload = () => resolve(image);
+          image.onerror = reject;
+          image.src = source;
+        });
+      }
+
+      function drawPosterPhotoCover(context, image, x, y, width, height, radius) {
+        const scale = Math.max(width / image.naturalWidth, height / image.naturalHeight);
+        const sourceWidth = width / scale;
+        const sourceHeight = height / scale;
+        const sourceX = (image.naturalWidth - sourceWidth) / 2;
+        const sourceY = (image.naturalHeight - sourceHeight) / 2;
+        context.save();
+        context.beginPath();
+        if (typeof context.roundRect === "function") {
+          context.roundRect(x, y, width, height, radius);
+        } else {
+          context.rect(x, y, width, height);
+        }
+        context.clip();
+        context.drawImage(image, sourceX, sourceY, sourceWidth, sourceHeight, x, y, width, height);
+        context.restore();
+      }
+
+      async function createPosterBlob() {
+        const original = await loadPosterImage("assets/share-poster-original.png");
+        const canvas = document.createElement("canvas");
+        canvas.width = original.naturalWidth;
+        canvas.height = original.naturalHeight;
+        const context = canvas.getContext("2d");
+        if (!context) return null;
+        context.drawImage(original, 0, 0);
+        for (const slot of posterPhotoSlots) {
+          const file = getPosterPhotoFile(slot.id);
+          if (!file) continue;
+          const url = URL.createObjectURL(file);
+          try {
+            const image = await loadPosterImage(url);
+            drawPosterPhotoCover(
+              context,
+              image,
+              (slot.sourceX / 100) * canvas.width,
+              (slot.sourceY / 100) * canvas.height,
+              (slot.sourceW / 100) * canvas.width,
+              (slot.sourceH / 100) * canvas.height,
+              slot.sourceRadius
+            );
+          } finally {
+            URL.revokeObjectURL(url);
+          }
+        }
+        return new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+      }
+
+      function preparePosterExport() {
+        if (posterExportUrl) return Promise.resolve(posterExportUrl);
+        if (posterExportPromise) return posterExportPromise;
+        posterPageLayer?.setAttribute("data-export-ready", "false");
+        posterExportPromise = createPosterBlob()
+          .then((blob) => {
+            posterExportPromise = null;
+            if (!blob) return "";
+            posterExportBlob = blob;
+            posterExportUrl = URL.createObjectURL(blob);
+            if (posterCompositeImage) {
+              posterCompositeImage.src = posterExportUrl;
+              posterCompositeImage.hidden = false;
+            }
+            posterPageLayer?.setAttribute("data-export-ready", "true");
+            return posterExportUrl;
+          })
+          .catch((error) => {
+            posterExportPromise = null;
+            posterPageLayer?.setAttribute("data-export-ready", "false");
+            throw error;
+          });
+        return posterExportPromise;
+      }
+
+      function triggerPosterDownload() {
+        if (!posterExportUrl) return false;
+        const link = document.createElement("a");
+        link.href = posterExportUrl;
+        link.download = "GMI-Cloud-WAIC2026-poster.png";
+        link.style.display = "none";
+        document.body.append(link);
+        link.click();
+        link.remove();
+        playFeedback("success");
+        return true;
+      }
+
+      async function savePosterImage() {
+        try {
+          await preparePosterExport();
+          if (!posterExportBlob) throw new Error("Poster export unavailable");
+          const file = new File(
+            [posterExportBlob],
+            "GMI-Cloud-WAIC2026-poster.png",
+            { type: "image/png" }
+          );
+          const canShareFile =
+            navigator.maxTouchPoints > 0 &&
+            navigator.canShare?.({ files: [file] }) &&
+            typeof navigator.share === "function";
+          if (canShareFile) {
+            try {
+              await navigator.share({
+                files: [file],
+                title: "GMI Cloud 打卡行动地图",
+              });
+              playFeedback("success");
+              return;
+            } catch (error) {
+              if (error?.name === "AbortError") return;
+            }
+          }
+          if (!triggerPosterDownload()) throw new Error("Poster download unavailable");
+        } catch {
+          playFeedback("close");
+        }
+      }
+
+      async function copyPosterShareText() {
+        try {
+          if (navigator.clipboard?.writeText) {
+            await navigator.clipboard.writeText(POSTER_SHARE_TEXT);
+          } else {
+            const textarea = document.createElement("textarea");
+            textarea.value = POSTER_SHARE_TEXT;
+            textarea.setAttribute("readonly", "");
+            textarea.style.position = "fixed";
+            textarea.style.opacity = "0";
+            document.body.append(textarea);
+            textarea.select();
+            document.execCommand("copy");
+            textarea.remove();
+          }
+          playFeedback("success");
+          vibrateFeedback(8);
+          if (posterCopyButton) {
+            window.clearTimeout(posterCopyResetTimer);
+            posterCopyButton.textContent = "复制成功";
+            posterCopyResetTimer = window.setTimeout(() => {
+              posterCopyButton.textContent = "复制文案";
+            }, 1200);
+          }
+        } catch {
+          playFeedback("close");
+        }
+      }
+
+      function closeInsightPhotoChoices() {
+        insightPhotoChoiceSheets.forEach((sheet) => {
+          sheet.hidden = true;
+          sheet.setAttribute("aria-hidden", "true");
+        });
+        activeInsightPhotoDetailId = null;
+      }
+
+      function closeInsightDetail(id, immediate = false) {
+        const card = insightDetailCards.get(id);
+        if (!card) return;
+        const isVisible = card.classList.contains("is-opening") || card.classList.contains("is-open");
+        if (!isVisible && !card.classList.contains("is-closing")) return;
+        if (activeInsightPhotoDetailId === id) closeInsightPhotoChoices();
+        if (activeInsightDetailId === id) activeInsightDetailId = null;
+        card.classList.remove("is-opening", "is-open");
+        card.setAttribute("aria-hidden", "true");
+        if (immediate) {
+          card.classList.remove("is-closing");
+          return;
+        }
+        card.classList.add("is-closing");
+        window.setTimeout(() => card.classList.remove("is-closing"), 240);
+      }
+
+      function closeInsightDetails() {
+        closeInsightPhotoChoices();
+        activeInsightDetailId = null;
+        insightDetailCards.forEach((card, id) => closeInsightDetail(id, true));
+      }
+
+      function closeActiveInsightDetail() {
+        if (!activeInsightDetailId) return;
+        const id = activeInsightDetailId;
+        closeInsightDetail(id);
+      }
+
+      function toggleInsightDetail(id) {
+        const card = insightDetailCards.get(id);
+        if (!card) return;
+        if (activeInsightDetailId === id) {
+          closeActiveInsightDetail();
+          playFeedback("close");
+          return;
+        }
+        if (activeInsightDetailId && activeInsightDetailId !== id) {
+          closeActiveInsightDetail();
+        }
+        activeInsightDetailId = id;
+        card.classList.remove("is-closing", "is-open");
+        card.classList.add("is-opening");
+        card.setAttribute("aria-hidden", "false");
+        playFeedback("open");
+        window.setTimeout(() => {
+          if (!card.classList.contains("is-opening")) return;
+          card.classList.remove("is-opening");
+          card.classList.add("is-open");
+        }, 270);
+      }
+
+      function openInsightPhotoChoices(button) {
+        const card = button?.closest?.("[data-insight-detail]");
+        const detailId = card?.dataset.insightDetail;
+        const sheet = card?.querySelector("[data-insight-photo-choice-sheet]");
+        if (!button || !detailId || !sheet) return;
+        const wasOpen = activeInsightPhotoDetailId === detailId && !sheet.hidden;
+        closeInsightPhotoChoices();
+        if (wasOpen) {
+          playFeedback("close");
+          return;
+        }
+        activeInsightPhotoDetailId = detailId;
+        sheet.hidden = false;
+        sheet.setAttribute("aria-hidden", "false");
+        playFeedback("open");
+      }
+
+      function openInsightNativePhotoInput(input) {
+        if (!activeInsightPhotoDetailId || !input) return;
+        input.value = "";
+        input.click();
+      }
+
+      function finishInsightPhotoSelection(event) {
+        const file = event.target.files?.[0];
+        event.target.value = "";
+        const detailId = activeInsightPhotoDetailId;
+        if (!file || !detailId) {
+          closeInsightPhotoChoices();
+          return;
+        }
+        selectedInsightPhotos.set(detailId, { file });
+        persistPhoto(`insight-${detailId}`, file).catch(() => {});
+        playFeedback("capture");
+        closeInsightPhotoChoices();
+        closeInsightDetail(detailId);
+      }
+
+      async function copyInsightCommand() {
+        const command = "白皮书";
+        try {
+          if (navigator.clipboard?.writeText) {
+            await navigator.clipboard.writeText(command);
+          } else {
+            const textarea = document.createElement("textarea");
+            textarea.value = command;
+            textarea.setAttribute("readonly", "");
+            textarea.style.position = "fixed";
+            textarea.style.opacity = "0";
+            document.body.append(textarea);
+            textarea.select();
+            document.execCommand("copy");
+            textarea.remove();
+          }
+          playFeedback("success");
+          vibrateFeedback(8);
+        } catch {
+          const textarea = document.createElement("textarea");
+          textarea.value = command;
+          textarea.setAttribute("readonly", "");
+          textarea.style.position = "fixed";
+          textarea.style.opacity = "0";
+          document.body.append(textarea);
+          textarea.select();
+          document.execCommand("copy");
+          textarea.remove();
+          playFeedback("success");
+        }
+      }
+
+      function openInsightPage() {
+        if (!insightLayer || insightPageState !== "closed") return;
+        finishIntro();
+        hideHeartBubble();
+        closePhotoChoices();
+        closeInsightDetails();
+        finishTaskbarPopup();
+        closeAllLevelPopups();
+        insightPageState = "entering";
+        insightLayer.classList.remove("is-closing", "is-open");
+        insightLayer.classList.add("is-entering");
+        insightLayer.setAttribute("aria-hidden", "false");
+        playFeedback("open");
+      }
+
+      function settleInsightOpen() {
+        if (!insightLayer || insightPageState !== "entering") return;
+        insightPageState = "open";
+        insightLayer.classList.remove("is-entering");
+        insightLayer.classList.add("is-open");
+      }
+
+      function closeInsightPage() {
+        if (!insightLayer || insightPageState === "closed" || insightPageState === "closing") {
+          return;
+        }
+        insightPageState = "closing";
+        insightLayer.classList.remove("is-entering", "is-open");
+        insightLayer.classList.add("is-closing");
+        insightLayer.setAttribute("aria-hidden", "true");
+        playFeedback("close");
+        window.setTimeout(finishInsightClose, 290);
+      }
+
+      function openPartnerPage() {
+        if (!partnerLayer || partnerPageState !== "closed") return;
+        finishIntro();
+        hideHeartBubble();
+        closePhotoChoices();
+        closeInsightDetails();
+        finishTaskbarPopup();
+        closeAllLevelPopups();
+        partnerPageState = "entering";
+        partnerLayer.classList.remove("is-closing", "is-open");
+        partnerLayer.classList.add("is-entering");
+        partnerLayer.setAttribute("aria-hidden", "false");
+        playFeedback("open");
+      }
+
+      function settlePartnerOpen() {
+        if (!partnerLayer || partnerPageState !== "entering") return;
+        partnerPageState = "open";
+        partnerLayer.classList.remove("is-entering");
+        partnerLayer.classList.add("is-open");
+      }
+
+      function closePartnerPage() {
+        if (!partnerLayer || partnerPageState === "closed" || partnerPageState === "closing") {
+          return;
+        }
+        partnerPageState = "closing";
+        partnerLayer.classList.remove("is-entering", "is-open");
+        partnerLayer.classList.add("is-closing");
+        partnerLayer.setAttribute("aria-hidden", "true");
+        playFeedback("close");
+        window.setTimeout(finishPartnerClose, 310);
+      }
+
+      function openPopup(id) {
+        const card = popupCards.get(id);
+        if (!card || droppingCheckins.has(id)) return;
+        card.classList.remove("is-closing", "is-open");
+        card.classList.add("is-opening");
+        card.setAttribute("aria-hidden", "false");
+      }
+
+      function settleOpen(card) {
+        card.classList.remove("is-opening");
+        card.classList.add("is-open");
+      }
+
+      function closePopup(id) {
+        const card = popupCards.get(id);
+        if (!card) return;
+        if (pendingCheckins.has(id)) {
+          pendingCheckins.delete(id);
+          droppingCheckins.add(id);
+          card.dataset.dropCheckmark = "true";
+        }
+        card.classList.remove("is-opening", "is-open");
+        card.classList.add("is-closing");
+        card.setAttribute("aria-hidden", "true");
+        window.setTimeout(() => finishClose(card), 310);
+      }
+
+      function finishClose(card) {
+        if (!card.classList.contains("is-closing")) return;
+        card.classList.remove("is-closing");
+        if (card.dataset.dropCheckmark !== "true") return;
+        delete card.dataset.dropCheckmark;
+        beginCheckmarkDrop(card.dataset.popup);
+      }
+
+      function hideHeartBubble() {
+        if (!heartBubble) return;
+        heartBubble.classList.remove("is-visible");
+        heartBubble.setAttribute("aria-hidden", "true");
+      }
+
+      function closePhotoChoices() {
+        photoChoiceSheets.forEach((sheet) => {
+          sheet.hidden = true;
+          sheet.setAttribute("aria-hidden", "true");
+        });
+        activePhotoCheckinButton = null;
+      }
+
+      function openPhotoChoices(button) {
+        const card = button?.closest?.(".popup-card");
+        const checkinId = card?.dataset.popup;
+        const sheet = card?.querySelector("[data-photo-choice-sheet]");
+        if (
+          !button ||
+          !checkinId ||
+          !sheet ||
+          pendingCheckins.has(checkinId) ||
+          droppingCheckins.has(checkinId)
+        ) {
+          return;
+        }
+        const wasOpen = activePhotoCheckinButton === button && !sheet.hidden;
+        closePhotoChoices();
+        if (wasOpen) {
+          playFeedback("close");
+          return;
+        }
+        activePhotoCheckinButton = button;
+        sheet.hidden = false;
+        sheet.setAttribute("aria-hidden", "false");
+        playFeedback("open");
+      }
+
+      function openNativePhotoInput(input) {
+        if (!activePhotoCheckinButton || !input) return;
+        input.value = "";
+        input.click();
+      }
+
+      function finishPhotoCheckin(file) {
+        const button = activePhotoCheckinButton;
+        const card = button?.closest?.(".popup-card");
+        const checkinId = card?.dataset.popup;
+        if (!file || !button || !checkinId) {
+          closePhotoChoices();
+          return;
+        }
+        selectedCheckinPhotos.set(checkinId, {
+          file,
+        });
+        persistPhoto(checkinId, file).catch(() => {});
+        playFeedback("capture");
+        closePhotoChoices();
+        if (!completedCheckins.has(checkinId)) {
+          completeCheckin(button);
+        }
+        if (activePopupId === checkinId) activePopupId = null;
+        closePopup(checkinId);
+      }
+
+      function handlePhotoSelection(event) {
+        const file = event.target.files?.[0];
+        event.target.value = "";
+        if (file) finishPhotoCheckin(file);
+      }
+
+      function renderCheckinProgress(count = checkinCount) {
+        if (taskbarProgress) {
+          taskbarProgress.textContent = `${count}/5`;
+        }
+        if (taskbarHeartState) {
+          taskbarHeartState.src = taskbarStateAssets[count];
+        }
+      }
+
+      function revealCheckinProgress(fromCount, toCount) {
+        if (!taskbarHeartReveal || fromCount >= toCount) return;
+        const nextCount = fromCount + 1;
+        playFeedback("reward");
+        vibrateFeedback(8);
+        taskbarHeartReveal.classList.remove("is-active");
+        taskbarHeartReveal.style.backgroundImage = `url("${taskbarRevealAssets[nextCount - 1]}")`;
+        void taskbarHeartReveal.offsetWidth;
+        taskbarHeartReveal.classList.add("is-active");
+        const finishReveal = () => {
+          taskbarHeartReveal.classList.remove("is-active");
+          renderCheckinProgress(nextCount);
+          revealedCheckinCount = nextCount;
+          if (nextCount < toCount) {
+            window.setTimeout(() => {
+              revealCheckinProgress(nextCount, toCount);
+            }, 80);
+          }
+        };
+        taskbarHeartReveal.addEventListener("animationend", finishReveal, {
+          once: true,
+        });
+      }
+
+      function creditCheckin(id) {
+        if (!droppingCheckins.delete(id) || completedCheckins.has(id)) return;
+        completedCheckins.add(id);
+        checkinCount = completedCheckins.size;
+        persistCheckinProgress();
+        const button = popupCards
+          .get(id)
+          ?.querySelector("[data-checkin-button]");
+        if (button) {
+          button.disabled = false;
+          button.removeAttribute("aria-disabled");
+        }
+        renderCheckinProgress();
+      }
+
+      function createCheckmarkMarker(id) {
+        const position = checkmarkPositions[id];
+        if (!position || !checkmarkLayer) return null;
+        const existing = checkmarkLayer.querySelector(`[data-checkin-marker="${id}"]`);
+        if (existing) return existing;
+        const marker = document.createElement("img");
+        marker.className = "checkmark-marker";
+        marker.dataset.checkinMarker = id;
+        marker.src = checkmarkAsset;
+        marker.alt = "";
+        marker.setAttribute("aria-hidden", "true");
+        marker.style.setProperty("--check-x", position.x);
+        marker.style.setProperty("--check-y", position.y);
+        checkmarkLayer.append(marker);
+        return marker;
+      }
+
+      function renderCompletedCheckmark(id) {
+        const marker = createCheckmarkMarker(id);
+        if (!marker) return;
+        marker.classList.remove("is-dropping");
+        marker.classList.add("is-complete");
+      }
+
+      function beginCheckmarkDrop(id) {
+        const position = checkmarkPositions[id];
+        if (!position || !checkmarkLayer) {
+          playStampFeedback();
+          vibrateFeedback(10);
+          creditCheckin(id);
+          return;
+        }
+        const marker = createCheckmarkMarker(id);
+        if (!marker) return;
+        let checkmarkSettled = false;
+        let checkmarkImpactPlayed = false;
+        const playCheckmarkImpact = () => {
+          if (checkmarkImpactPlayed) return;
+          checkmarkImpactPlayed = true;
+          playStampFeedback();
+          vibrateFeedback(10);
+        };
+        const settleCheckmark = () => {
+          if (checkmarkSettled) return;
+          checkmarkSettled = true;
+          playCheckmarkImpact();
+          marker.classList.remove("is-dropping");
+          marker.classList.add("is-complete");
+          creditCheckin(id);
+        };
+        marker.addEventListener(
+          "animationend",
+          settleCheckmark,
+          { once: true }
+        );
+        window.requestAnimationFrame(() => {
+          marker.classList.add("is-dropping");
+          window.setTimeout(
+            playCheckmarkImpact,
+            CHECKMARK_DROP_DURATION_MS * CHECKMARK_IMPACT_RATIO
+          );
+        });
+        window.setTimeout(settleCheckmark, 580);
+      }
+
+      function completeCheckin(button) {
+        const card = button?.closest?.(".popup-card");
+        const checkinId = card?.dataset.popup;
+        if (
+          !checkinId ||
+          completedCheckins.has(checkinId) ||
+          pendingCheckins.has(checkinId) ||
+          droppingCheckins.has(checkinId) ||
+          completedCheckins.size >= 5
+        ) {
+          return;
+        }
+        pendingCheckins.add(checkinId);
+        button.disabled = true;
+        button.setAttribute("aria-disabled", "true");
+      }
+
+      function closeAllLevelPopups() {
+        if (!activePopupId) return;
+        const closingId = activePopupId;
+        activePopupId = null;
+        closePopup(closingId);
+      }
+
+      function openTaskbarPopup() {
+        if (!taskbarLayer) return;
+        finishIntro();
+        hideHeartBubble();
+        closePhotoChoices();
+        closeAllLevelPopups();
+        const hasNewHearts = checkinCount > revealedCheckinCount;
+        renderCheckinProgress(hasNewHearts ? revealedCheckinCount : checkinCount);
+        taskbarPopupState = "open";
+        taskbarLayer.classList.remove("is-closing", "is-visible");
+        void taskbarLayer.offsetWidth;
+        taskbarLayer.classList.add("is-visible");
+        taskbarLayer.setAttribute("aria-hidden", "false");
+        playFeedback("open");
+        if (!hasNewHearts) return;
+        window.requestAnimationFrame(() => {
+          window.requestAnimationFrame(() => {
+            revealCheckinProgress(revealedCheckinCount, checkinCount);
+          });
+        });
+      }
+
+      function closeTaskbarPopup() {
+        if (!taskbarLayer) return;
+        if (taskbarPopupState === "closed" || taskbarPopupState === "closing") {
+          return;
+        }
+        taskbarPopupState = "closing";
+        taskbarLayer.classList.remove("is-visible");
+        taskbarLayer.classList.add("is-closing");
+        taskbarLayer.setAttribute("aria-hidden", "true");
+        playFeedback("close");
+      }
+
+      function finishTaskbarPopup() {
+        if (!taskbarLayer) return;
+        taskbarPopupState = "closed";
+        taskbarLayer.classList.remove("is-visible", "is-closing");
+        taskbarLayer.setAttribute("aria-hidden", "true");
+      }
+
+      function showHeartBubble() {
+        if (!heartBubble) return;
+        finishIntro();
+        closePhotoChoices();
+        if (activePopupId) {
+          const closingId = activePopupId;
+          activePopupId = null;
+          closePopup(closingId);
+        }
+        heartBubble.classList.remove("is-visible");
+        void heartBubble.offsetWidth;
+        heartBubble.classList.add("is-visible");
+        heartBubble.setAttribute("aria-hidden", "false");
+        playFeedback("tap");
+      }
+
+      function activatePopup(id) {
+        finishIntro();
+        hideHeartBubble();
+        finishTaskbarPopup();
+        closePhotoChoices();
+        const currentId = activePopupId;
+        if (currentId === id) {
+          activePopupId = null;
+          closePopup(id);
+          playFeedback("close");
+          return;
+        }
+        if (currentId) closePopup(currentId);
+        activePopupId = id;
+        openPopup(id);
+        playFeedback("open");
+      }
+
+      popupButtons.forEach((button) => {
+        button.addEventListener("click", (event) => {
+          event.stopPropagation();
+          pulseFeedback(button);
+          activatePopup(button.dataset.popupTarget);
+        });
+      });
+
+      if (pandaButton) {
+        pandaButton.addEventListener("click", (event) => {
+          event.stopPropagation();
+          pulseFeedback(pandaButton);
+          finishTaskbarPopup();
+          showHeartBubble();
+        });
+      }
+
+      if (insightButton) {
+        insightButton.addEventListener("click", (event) => {
+          event.stopPropagation();
+          pulseFeedback(insightButton);
+          openInsightPage();
+        });
+      }
+
+      if (insightGlobeButton) {
+        insightGlobeButton.addEventListener("click", (event) => {
+          event.stopPropagation();
+          pulseFeedback(insightGlobeButton);
+          openInsightPage();
+        });
+      }
+
+      if (insightCloseButton) {
+        insightCloseButton.addEventListener("click", (event) => {
+          event.stopPropagation();
+          pulseFeedback(insightCloseButton);
+          closeInsightPage();
+        });
+      }
+
+      if (partnerButton) {
+        partnerButton.addEventListener("click", (event) => {
+          event.stopPropagation();
+          pulseFeedback(partnerButton);
+          openPartnerPage();
+        });
+      }
+
+      if (partnerCloseButton) {
+        partnerCloseButton.addEventListener("click", (event) => {
+          event.stopPropagation();
+          pulseFeedback(partnerCloseButton);
+          closePartnerPage();
+        });
+      }
+
+      if (posterTargetButton) {
+        posterTargetButton.addEventListener("click", (event) => {
+          event.stopPropagation();
+          pulseFeedback(posterTargetButton);
+          openPosterPage();
+        });
+      }
+
+      if (insightPosterTargetButton) {
+        insightPosterTargetButton.addEventListener("click", (event) => {
+          event.stopPropagation();
+          pulseFeedback(insightPosterTargetButton);
+          openPosterPage();
+        });
+      }
+
+      if (partnerPosterTargetButton) {
+        partnerPosterTargetButton.addEventListener("click", (event) => {
+          event.stopPropagation();
+          pulseFeedback(partnerPosterTargetButton);
+          openPosterPage();
+        });
+      }
+
+      if (posterSaveButton) {
+        posterSaveButton.addEventListener("click", (event) => {
+          event.stopPropagation();
+          pulseFeedback(posterSaveButton);
+          savePosterImage();
+        });
+      }
+
+      if (posterCopyButton) {
+        posterCopyButton.addEventListener("click", (event) => {
+          event.stopPropagation();
+          pulseFeedback(posterCopyButton);
+          copyPosterShareText();
+        });
+      }
+
+      posterReturnButtons.forEach((button) => {
+        button.addEventListener("click", (event) => {
+          event.stopPropagation();
+          pulseFeedback(button);
+          closePosterPage();
+        });
+      });
+
+      insightDetailTargets.forEach((button) => {
+        button.addEventListener("click", (event) => {
+          event.stopPropagation();
+          pulseFeedback(button);
+          toggleInsightDetail(button.dataset.insightDetailTarget);
+        });
+      });
+
+      insightDetailCards.forEach((card) => {
+        card.addEventListener("click", (event) => {
+          if (event.target.closest(".insight-detail-action")) return;
+          if (event.target.closest("[data-insight-photo-choice-sheet]")) return;
+          closeActiveInsightDetail();
+          playFeedback("close");
+        });
+      });
+
+      insightPhotoChoiceSheets.forEach((sheet) => {
+        sheet.addEventListener("click", (event) => event.stopPropagation());
+      });
+
+      if (insightCopyCommandButton) {
+        insightCopyCommandButton.addEventListener("click", (event) => {
+          event.stopPropagation();
+          pulseFeedback(insightCopyCommandButton);
+          copyInsightCommand();
+        });
+      }
+
+      insightPhotoPlusButtons.forEach((button) => {
+        button.addEventListener("click", (event) => {
+          event.stopPropagation();
+          pulseFeedback(button);
+          openInsightPhotoChoices(button);
+        });
+      });
+
+      insightPhotoLibraryChoices.forEach((button) => {
+        button.addEventListener("click", (event) => {
+          event.stopPropagation();
+          pulseFeedback(button);
+          playFeedback("tap");
+          openInsightNativePhotoInput(insightPhotoLibraryInput);
+        });
+      });
+
+      insightPhotoCameraChoices.forEach((button) => {
+        button.addEventListener("click", (event) => {
+          event.stopPropagation();
+          pulseFeedback(button);
+          playFeedback("tap");
+          openInsightNativePhotoInput(insightPhotoCameraInput);
+        });
+      });
+
+      [insightPhotoLibraryInput, insightPhotoCameraInput].forEach((input) => {
+        input?.addEventListener("click", (event) => event.stopPropagation());
+        input?.addEventListener("change", finishInsightPhotoSelection);
+        input?.addEventListener("input", finishInsightPhotoSelection);
+        input?.addEventListener("cancel", closeInsightPhotoChoices);
+      });
+
+      if (taskbarButton) {
+        taskbarButton.addEventListener("click", (event) => {
+          event.stopPropagation();
+          pulseFeedback(taskbarButton);
+          openTaskbarPopup();
+        });
+      }
+
+      if (taskbarCloseButton) {
+        taskbarCloseButton.addEventListener("click", (event) => {
+          event.stopPropagation();
+          pulseFeedback(taskbarCloseButton);
+          closeTaskbarPopup();
+        });
+      }
+
+      checkinButtons.forEach((button) => {
+        button.addEventListener("click", (event) => {
+          event.stopPropagation();
+          pulseFeedback(button);
+          openPhotoChoices(button);
+        });
+      });
+
+      photoLibraryChoices.forEach((button) => {
+        button.addEventListener("click", (event) => {
+          event.stopPropagation();
+          pulseFeedback(button);
+          playFeedback("tap");
+          openNativePhotoInput(photoLibraryInput);
+        });
+      });
+
+      photoCameraChoices.forEach((button) => {
+        button.addEventListener("click", (event) => {
+          event.stopPropagation();
+          pulseFeedback(button);
+          playFeedback("tap");
+          openNativePhotoInput(photoCameraInput);
+        });
+      });
+
+      [photoLibraryInput, photoCameraInput].forEach((input) => {
+        input?.addEventListener("click", (event) => event.stopPropagation());
+        input?.addEventListener("change", handlePhotoSelection);
+        input?.addEventListener("input", handlePhotoSelection);
+        input?.addEventListener("cancel", closePhotoChoices);
+      });
+
+      if (taskbarLayer) {
+        taskbarLayer.addEventListener("animationend", (event) => {
+          if (event.animationName === "taskbar-popup-out") {
+            finishTaskbarPopup();
+          }
+        });
+      }
+
+      if (insightLayer) {
+        insightLayer.addEventListener("animationend", (event) => {
+          if (event.animationName === "insight-page-in") settleInsightOpen();
+          if (event.animationName === "insight-page-out") finishInsightClose();
+        });
+        insightLayer.addEventListener("click", (event) => {
+          event.stopPropagation();
+          if (!activeInsightDetailId) return;
+          if (event.target.closest("[data-insight-detail-target]")) return;
+          if (event.target.closest(".insight-detail-action")) return;
+          if (event.target.closest("[data-insight-photo-choice-sheet]")) return;
+          closeActiveInsightDetail();
+          playFeedback("close");
+        });
+      }
+
+      if (partnerLayer) {
+        partnerLayer.addEventListener("animationend", (event) => {
+          if (event.animationName === "partner-page-in") settlePartnerOpen();
+          if (event.animationName === "partner-page-out") finishPartnerClose();
+        });
+        partnerLayer.addEventListener("click", (event) => event.stopPropagation());
+      }
+
+      if (posterPageLayer) {
+        posterPageLayer.addEventListener("animationend", (event) => {
+          if (event.animationName === "poster-page-in") settlePosterOpen();
+          if (event.animationName === "poster-page-out") finishPosterClose();
+        });
+        posterPageLayer.addEventListener("click", (event) => event.stopPropagation());
+      }
+
+      popupCards.forEach((card) => {
+        card.addEventListener("animationend", (event) => {
+          if (event.animationName === "card-in") settleOpen(card);
+          if (event.animationName === "card-out") finishClose(card);
+        });
+        card.addEventListener("click", (event) => {
+          event.stopPropagation();
+        });
+      });
+
+      document.addEventListener("click", () => {
+        if (
+          insightPageState !== "closed" ||
+          partnerPageState !== "closed" ||
+          posterPageState !== "closed"
+        ) {
+          return;
+        }
+        hideHeartBubble();
+        closePhotoChoices();
+        if (!activePopupId) return;
+        const closingId = activePopupId;
+        activePopupId = null;
+        closePopup(closingId);
+        playFeedback("close");
+      });
+
+      window.addEventListener("keydown", (event) => {
+        if (event.key !== "Escape") return;
+        if (insightPageState !== "closed") {
+          closeInsightPage();
+          return;
+        }
+        if (partnerPageState !== "closed") {
+          closePartnerPage();
+          return;
+        }
+        if (posterPageState !== "closed") {
+          closePosterPage();
+          return;
+        }
+        closePhotoChoices();
+        if (!activePopupId) return;
+        const closingId = activePopupId;
+        activePopupId = null;
+        closePopup(closingId);
+      });
+
+      renderCheckinProgress();
+      restorePersistedState().catch(() => {});
+    </script>
+  </body>
+</html>
