@@ -3,23 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Canva Replica</title>
+    <title>GMI Cloud 行动地图打卡</title>
     <link rel="icon" href="data:," />
-    <link rel="preload" as="image" href="assets/page-background.jpg" />
-    <link rel="preload" as="image" href="assets/canva-poster-decorated-transparent.png" />
+    <link rel="preload" as="image" href="assets/page-background.jpg" fetchpriority="high" />
+    <link rel="preload" as="image" href="assets/canva-poster-decorated-transparent.png" fetchpriority="high" />
     <link rel="preload" as="image" href="assets/gmi-logo.png" />
-    <link rel="preload" as="image" href="assets/poster-sign.png" />
-    <link rel="preload" as="image" href="assets/share-poster-page.png" />
-    <link rel="preload" as="image" href="assets/share-poster-original.png" />
-    <link rel="preload" as="image" href="assets/insight-page-report-map.png" />
-    <link rel="preload" as="image" href="assets/partner-page-new.png" />
-    <link rel="preload" as="image" href="assets/insight-detail-1.png" />
-    <link rel="preload" as="image" href="assets/insight-detail-2.png" />
-    <link rel="preload" as="image" href="assets/insight-detail-3.png" />
-    <link rel="preload" as="image" href="assets/checkmark-green.png?v=2" />
-    <link rel="preload" as="image" href="assets/taskbar-popup-frame.png?v=cutout2" />
-    <link rel="preload" as="image" href="assets/taskbar-hearts-state-1.png?v=exact2" />
-    <link rel="preload" as="image" href="assets/taskbar-heart-reveal-1.png?v=exact2" />
+    <link rel="preload" as="image" href="assets/poster-sign-cutout.png" />
     <style>
       :root {
         color-scheme: light;
@@ -1411,11 +1400,13 @@
     </style>
   </head>
   <body>
-    <main class="canvas-stage" aria-label="Canva design replica">
+    <main class="canvas-stage" aria-label="GMI Cloud 行动地图打卡">
       <div class="map-frame">
         <img
           class="map-art"
           src="assets/canva-poster-decorated-transparent.png"
+          fetchpriority="high"
+          decoding="async"
           width="941"
           height="1672"
           alt=""
@@ -1626,7 +1617,8 @@
         >
           <img
             class="insight-page-art"
-            src="assets/insight-page-report-map.png"
+            data-deferred-src="assets/insight-page-report-map.png"
+            decoding="async"
             width="941"
             height="1672"
             alt=""
@@ -1638,12 +1630,12 @@
           <button class="insight-detail-target insight-detail-target-3" type="button" data-insight-detail-target="3" aria-label="Open AI Agent sharing details"></button>
 
           <article class="insight-detail-card insight-detail-card-1" data-insight-detail="1" aria-hidden="true">
-            <img class="insight-detail-art" src="assets/insight-detail-1.png" width="435" height="338" alt="" draggable="false" />
+            <img class="insight-detail-art" data-deferred-src="assets/insight-detail-1.png" decoding="async" width="435" height="338" alt="" draggable="false" />
             <button class="insight-detail-action insight-copy-hotspot" type="button" data-insight-copy-command aria-label="Copy white paper command"></button>
           </article>
 
           <article class="insight-detail-card insight-detail-card-2" data-insight-detail="2" aria-hidden="true">
-            <img class="insight-detail-art" src="assets/insight-detail-2.png" width="370" height="390" alt="" draggable="false" />
+            <img class="insight-detail-art" data-deferred-src="assets/insight-detail-2.png" decoding="async" width="370" height="390" alt="" draggable="false" />
             <button class="insight-detail-action insight-photo-plus-hotspot" type="button" data-insight-photo-plus aria-label="Add global AI sharing photo"></button>
             <div class="photo-choice-sheet insight-photo-choice-sheet" data-insight-photo-choice-sheet hidden aria-hidden="true">
               <span class="photo-choice-crop"><img class="photo-choice-reference" src="assets/photo-choice-reference.png" alt="" aria-hidden="true" draggable="false" /></span>
@@ -1654,7 +1646,7 @@
           </article>
 
           <article class="insight-detail-card insight-detail-card-3" data-insight-detail="3" aria-hidden="true">
-            <img class="insight-detail-art" src="assets/insight-detail-3.png" width="402" height="358" alt="" draggable="false" />
+            <img class="insight-detail-art" data-deferred-src="assets/insight-detail-3.png" decoding="async" width="402" height="358" alt="" draggable="false" />
             <button class="insight-detail-action insight-photo-plus-hotspot" type="button" data-insight-photo-plus aria-label="Add AI Agent sharing photo"></button>
             <div class="photo-choice-sheet insight-photo-choice-sheet" data-insight-photo-choice-sheet hidden aria-hidden="true">
               <span class="photo-choice-crop"><img class="photo-choice-reference" src="assets/photo-choice-reference.png" alt="" aria-hidden="true" draggable="false" /></span>
@@ -1680,7 +1672,8 @@
         <section class="partner-page-layer" data-partner-layer aria-hidden="true">
           <img
             class="partner-page-art"
-            src="assets/partner-page-new.png"
+            data-deferred-src="assets/partner-page-new.png"
+            decoding="async"
             width="941"
             height="1672"
             alt=""
@@ -1703,7 +1696,8 @@
         <section class="poster-page-layer" data-poster-page-layer aria-hidden="true">
           <img
             class="poster-page-art"
-            src="assets/share-poster-page.png"
+            data-deferred-src="assets/share-poster-page.png"
+            decoding="async"
             width="941"
             height="1672"
             alt=""
@@ -2099,6 +2093,41 @@
         });
       }
 
+      function hydrateDeferredImages(scope = document) {
+        const images = scope instanceof HTMLImageElement
+          ? [scope]
+          : Array.from(scope.querySelectorAll("img[data-deferred-src]"));
+        images.forEach((image) => {
+          const source = image.dataset.deferredSrc;
+          if (!source) return;
+          image.src = source;
+          delete image.dataset.deferredSrc;
+        });
+      }
+
+      function warmDeferredImages() {
+        const images = Array.from(document.querySelectorAll("img[data-deferred-src]"));
+        let index = 0;
+        const warmNext = () => {
+          if (index >= images.length) return;
+          hydrateDeferredImages(images[index]);
+          index += 1;
+          window.setTimeout(warmNext, 260);
+        };
+        warmNext();
+      }
+
+      window.addEventListener("load", () => {
+        const scheduleWarmup = () => {
+          if ("requestIdleCallback" in window) {
+            window.requestIdleCallback(warmDeferredImages, { timeout: 3000 });
+          } else {
+            window.setTimeout(warmDeferredImages, 1200);
+          }
+        };
+        window.setTimeout(scheduleWarmup, 500);
+      }, { once: true });
+
       preloadAssets([taskbarStateAssets[0], checkmarkAsset]);
 
       const preloadRewardAssets = () => {
@@ -2323,6 +2352,7 @@
 
       function openPosterPage() {
         if (!posterPageLayer || posterPageState !== "closed") return;
+        hydrateDeferredImages(posterPageLayer);
         finishIntro();
         hideHeartBubble();
         closePhotoChoices();
@@ -2560,6 +2590,7 @@
         if (activeInsightDetailId && activeInsightDetailId !== id) {
           closeActiveInsightDetail();
         }
+        hydrateDeferredImages(card);
         activeInsightDetailId = id;
         card.classList.remove("is-closing", "is-open");
         card.classList.add("is-opening");
@@ -2644,6 +2675,7 @@
 
       function openInsightPage() {
         if (!insightLayer || insightPageState !== "closed") return;
+        hydrateDeferredImages(insightLayer);
         finishIntro();
         hideHeartBubble();
         closePhotoChoices();
@@ -2678,6 +2710,7 @@
 
       function openPartnerPage() {
         if (!partnerLayer || partnerPageState !== "closed") return;
+        hydrateDeferredImages(partnerLayer);
         finishIntro();
         hideHeartBubble();
         closePhotoChoices();
