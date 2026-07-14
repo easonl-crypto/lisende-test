@@ -2101,13 +2101,14 @@
         });
       }
 
-      function hydrateDeferredImages(scope = document) {
+      function hydrateDeferredImages(scope = document, priority = "auto") {
         const images = scope instanceof HTMLImageElement
           ? [scope]
           : Array.from(scope.querySelectorAll("img[data-deferred-src]"));
         images.forEach((image) => {
           const source = image.dataset.deferredSrc;
           if (!source) return;
+          image.fetchPriority = priority;
           image.src = source;
           delete image.dataset.deferredSrc;
         });
@@ -2118,7 +2119,7 @@
         let index = 0;
         const warmNext = () => {
           if (index >= images.length) return;
-          hydrateDeferredImages(images[index]);
+          hydrateDeferredImages(images[index], "low");
           index += 1;
           window.setTimeout(warmNext, 260);
         };
@@ -2144,7 +2145,7 @@
           } else {
             scheduleWarmup();
           }
-        }, 600);
+        }, 1400);
       }, { once: true });
 
       function persistCheckinProgress() {
@@ -2356,7 +2357,7 @@
 
       function openPosterPage() {
         if (!posterPageLayer || posterPageState !== "closed") return;
-        hydrateDeferredImages(posterPageLayer);
+        hydrateDeferredImages(posterPageLayer, "high");
         finishIntro();
         hideHeartBubble();
         closePhotoChoices();
@@ -2594,7 +2595,7 @@
         if (activeInsightDetailId && activeInsightDetailId !== id) {
           closeActiveInsightDetail();
         }
-        hydrateDeferredImages(card);
+        hydrateDeferredImages(card, "high");
         activeInsightDetailId = id;
         card.classList.remove("is-closing", "is-open");
         card.classList.add("is-opening");
@@ -2679,7 +2680,7 @@
 
       function openInsightPage() {
         if (!insightLayer || insightPageState !== "closed") return;
-        hydrateDeferredImages(insightLayer);
+        hydrateDeferredImages(insightLayer, "high");
         finishIntro();
         hideHeartBubble();
         closePhotoChoices();
@@ -2714,7 +2715,7 @@
 
       function openPartnerPage() {
         if (!partnerLayer || partnerPageState !== "closed") return;
-        hydrateDeferredImages(partnerLayer);
+        hydrateDeferredImages(partnerLayer, "high");
         finishIntro();
         hideHeartBubble();
         closePhotoChoices();
@@ -2750,7 +2751,7 @@
       function openPopup(id) {
         const card = popupCards.get(id);
         if (!card || droppingCheckins.has(id)) return;
-        hydrateDeferredImages(card);
+        hydrateDeferredImages(card, "high");
         card.classList.remove("is-closing", "is-open");
         card.classList.add("is-opening");
         card.setAttribute("aria-hidden", "false");
@@ -2994,7 +2995,7 @@
 
       function openTaskbarPopup() {
         if (!taskbarLayer) return;
-        hydrateDeferredImages(taskbarLayer);
+        hydrateDeferredImages(taskbarLayer, "high");
         finishIntro();
         hideHeartBubble();
         closePhotoChoices();
@@ -3036,7 +3037,7 @@
 
       function showHeartBubble() {
         if (!heartBubble) return;
-        hydrateDeferredImages(heartBubble);
+        hydrateDeferredImages(heartBubble, "high");
         finishIntro();
         closePhotoChoices();
         if (activePopupId) {
